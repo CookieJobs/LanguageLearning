@@ -1,0 +1,16 @@
+{
+  "version": "v1.0.0",
+  "license": "Internal use",
+  "sources": ["CEFR guidelines", "Frequency lists (NGSL/COCA)", "AWL topics"],
+  "counts": {
+    "total": 15,
+    "byLevel": {
+      "Primary": 5,
+      "Middle": 3,
+      "High": 3,
+      "University": 2,
+      "Professional": 2
+    }
+  }
+}
+

@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  status        String   @default("active")
+  createdAt     DateTime @default(now())
+  profile       UserProfile?
+  providers     AuthProvider[]
+  refreshTokens RefreshToken[]
+  masteries     WordMastery[]
+  activities    DailyActivity[]
+  stats         UserStats?
+}
+
+model UserProfile {
+  id             String  @id @default(cuid())
+  userId         String  @unique
+  user           User    @relation(fields: [userId], references: [id])
+  name           String?
+  avatarUrl      String?
+  educationLevel String?
+}
+
+model AuthProvider {
+  id          String @id @default(cuid())
+  userId      String
+  user        User   @relation(fields: [userId], references: [id])
+  provider    String
+  providerUid String
+  @@unique([provider, providerUid])
+}
+
+model RefreshToken {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  tokenHash  String
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  deviceInfo String?
+  ipLast     String?
+}
+
+model EmailVerification {
+  id        String   @id @default(cuid())
+  userId    String
+  codeHash  String
+  expiresAt DateTime
+  consumed  Boolean  @default(false)
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  userId    String
+  codeHash  String
+  expiresAt DateTime
+  consumed  Boolean  @default(false)
+}
+
+model WordMastery {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  word         String
+  definition   String
+  partOfSpeech String
+  example      String
+  userSentence String
+  masteredAt   DateTime
+}
+
+model DailyActivity {
+  id     String   @id @default(cuid())
+  userId String
+  user   User     @relation(fields: [userId], references: [id])
+  date   DateTime
+
+  @@unique([userId, date])
+}
+
+model UserStats {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id])
+  totalMastered    Int      @default(0)
+  currentStreak    Int      @default(0)
+  longestStreak    Int      @default(0)
+  lastActivityDate DateTime?
+}
+
+model VocabWord {
+  id           String     @id @default(cuid())
+  headword     String
+  lemma        String
+  pos          String
+  cefr         String
+  freqRank     Int?
+  definitionEn String
+  definitionZh String
+  exampleEn    String
+  ipa          String?
+  audioUrl     String?
+  topics       VocabWordTopic[]
+  levels       VocabWordLevel[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  @@unique([lemma, pos])
+  @@index([headword])
+  @@index([cefr])
+}
+
+model VocabTopic {
+  id    Int        @id @default(autoincrement())
+  code  String     @unique
+  name  String
+  words VocabWordTopic[]
+}
+
+model VocabWordTopic {
+  wordId  String
+  topicId Int
+  word    VocabWord @relation(fields: [wordId], references: [id], onDelete: Cascade)
+  topic   VocabTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  @@id([wordId, topicId])
+}
+
+model VocabLevel {
+  id    Int        @id @default(autoincrement())
+  code  String     @unique
+  name  String
+  words VocabWordLevel[]
+}
+
+model VocabWordLevel {
+  wordId  String
+  levelId Int
+  word    VocabWord @relation(fields: [wordId], references: [id], onDelete: Cascade)
+  level   VocabLevel @relation(fields: [levelId], references: [id], onDelete: Cascade)
+  @@id([wordId, levelId])
+}

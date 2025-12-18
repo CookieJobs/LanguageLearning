@@ -1,0 +1,33 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: linguacraft
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+  backend:
+    build: ./backend
+    command: sh -c "npm install && npm run dev"
+    environment:
+      - API_PORT=5500
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/linguacraft
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=change_me
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - DEEPSEEK_MODEL=deepseek-chat
+    ports:
+      - "5500:5500"
+    depends_on:
+      - postgres
+      - redis
+volumes:
+  pgdata:
