@@ -1,3 +1,7 @@
+// input: argon2, @prisma/client
+// output: 无
+// pos: 系统/通用
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 
 import * as argon2 from 'argon2';
 import { PrismaClient } from '@prisma/client';

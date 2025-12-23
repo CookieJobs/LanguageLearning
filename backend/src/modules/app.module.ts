@@ -1,3 +1,7 @@
+// input: @nestjs/common, ./auth/auth.module, ./learning/learning.module, ./stats/stats.module, ./user/user.module, ./health.controller
+// output: AppModule
+// pos: 系统/通用
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import { Module } from '@nestjs/common'
 import { AuthModule } from './auth/auth.module'
 import { LearningModule } from './learning/learning.module'

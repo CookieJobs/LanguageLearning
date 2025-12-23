@@ -1,3 +1,7 @@
+// input: @nestjs/common, ../../common/prisma.service, argon2, jsonwebtoken
+// output: AuthService
+// pos: 后端/鉴权模块
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common'
 import { PrismaService } from '../../common/prisma.service'
 import * as argon2 from 'argon2'

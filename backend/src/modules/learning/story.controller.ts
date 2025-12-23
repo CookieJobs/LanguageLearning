@@ -1,3 +1,7 @@
+// input: @nestjs/common, ../../common/jwt.guard, ./deepseek.service, ../../common/prisma.service
+// output: StoryController, route:story
+// pos: 后端/学习模块
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import { Body, Controller, Post, UseGuards } from '@nestjs/common'
 import { JwtGuard } from '../../common/jwt.guard'
 import { DeepSeekService } from './deepseek.service'

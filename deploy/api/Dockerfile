@@ -1,3 +1,7 @@
+# input: 无
+# output: 无
+# pos: 部署/配置
+# 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 FROM node:20-alpine AS base
 WORKDIR /app
 COPY package.json package-lock.json tsconfig.json ./

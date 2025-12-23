@@ -1,3 +1,7 @@
+// input: react, ../types, ../services/geminiService, lucide-react, ./StoryModal
+// output: ReviewList
+// pos: 前端/组件层
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import React, { useEffect, useState } from 'react';
 import { MasteredItem } from '../types';
 import { fetchMasteryList, generateStory } from '../services/geminiService';

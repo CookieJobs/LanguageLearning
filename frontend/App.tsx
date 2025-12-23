@@ -1,5 +1,10 @@
+// input: react, ./components/LoadingOverlay, ./components/SessionExpiredModal, lucide-react, react-router-dom, ./contexts/AppContext, ./router/AuthGuard, ./pages/LoginPage, ./pages/HomePage, ./pages/LearnPage, ./pages/ReviewPage, ./components/Logo
+// output: AppRouter
+// pos: 系统/通用
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import React from 'react';
 import { LoadingOverlay } from './components/LoadingOverlay';
+import { SessionExpiredModal } from './components/SessionExpiredModal';
 import { LogOut, User } from 'lucide-react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AppProvider, useApp } from './contexts/AppContext';
@@ -80,10 +85,13 @@ const HeaderBar: React.FC = () => {
 
 const AppRouter: React.FC = () => {
   const Shell: React.FC = () => {
-    const { isLoading, token } = useApp();
+    const { isLoading, token, isSessionExpired, logout } = useApp();
     const location = useLocation();
     const navigate = useNavigate();
+    
     React.useEffect(() => {
+      // If no token and not on login page, redirect.
+      // Note: If session is expired, token might still be there until user confirms logout.
       if (!token && location.pathname !== '/login') {
         navigate('/login', { replace: true, state: { from: location } });
       }
@@ -112,6 +120,13 @@ const AppRouter: React.FC = () => {
           </footer>
         )}
         <LoadingOverlay visible={isLoading} />
+        <SessionExpiredModal 
+            visible={isSessionExpired} 
+            onLogin={async () => {
+                await logout();
+                navigate('/login');
+            }} 
+        />
       </div>
     );
   };

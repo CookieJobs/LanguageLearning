@@ -1,3 +1,7 @@
+// input: @nestjs/common, ./auth.service, ../../common/jwt.guard, class-validator
+// output: AuthController, route:auth
+// pos: 后端/鉴权模块
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import { Body, Controller, Post, UseGuards, Req } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { JwtGuard } from '../../common/jwt.guard'

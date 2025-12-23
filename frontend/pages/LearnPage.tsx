@@ -1,3 +1,7 @@
+// input: react, react-router-dom, ../components/LearningSession, ../components/SessionSummary, ../contexts/AppContext
+// output: LearnPage
+// pos: 前端/页面层
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LearningSession } from '../components/LearningSession';

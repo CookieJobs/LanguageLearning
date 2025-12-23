@@ -1,3 +1,7 @@
+// input: react
+// output: TransitionSwitch
+// pos: 前端/组件层
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import React, { useEffect, useRef, useState } from 'react';
 
 interface TransitionSwitchProps<K extends string> { activeKey: K; views: Record<K, React.ReactNode>; durationMs?: number }

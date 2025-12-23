@@ -1,3 +1,7 @@
+// input: @nestjs/common, ../../common/prisma.service, ../../common/jwt.guard, class-validator
+// output: UserController, route:me
+// pos: 后端/用户模块
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import { Controller, Get, Patch, Body, UseGuards, Req } from '@nestjs/common'
 import { PrismaService } from '../../common/prisma.service'
 import { JwtGuard } from '../../common/jwt.guard'

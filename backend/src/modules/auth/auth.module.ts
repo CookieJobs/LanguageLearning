@@ -1,3 +1,7 @@
+// input: @nestjs/common, ./auth.controller, ./auth.service, ../../common/prisma.service
+// output: AuthModule
+// pos: 后端/鉴权模块
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import { Module } from '@nestjs/common'
 import { AuthController } from './auth.controller'
 import { AuthService } from './auth.service'

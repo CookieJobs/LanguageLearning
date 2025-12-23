@@ -1,6 +1,11 @@
+// input: react, ./Logo, lucide-react, ../services/config
+// output: Auth
+// pos: 前端/组件层
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import React, { useState } from 'react'
 import { Logo } from './Logo'
 import { ArrowRight, Loader2 } from 'lucide-react'
+import { API_BASE } from '../services/config'
 
 interface AuthProps {
   onAuthed: (token: string) => void
@@ -18,7 +23,7 @@ export const Auth: React.FC<AuthProps> = ({ onAuthed }) => {
     setIsLoading(true)
     setError('')
     try {
-      const res = await fetch(`/api/${mode === 'login' ? 'auth/login' : 'auth/register'}`, {
+      const res = await fetch(`${API_BASE}/api/${mode === 'login' ? 'auth/login' : 'auth/register'}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })

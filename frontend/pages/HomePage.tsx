@@ -1,3 +1,7 @@
+// input: react, react-router-dom, ../contexts/AppContext, ../services/geminiService, lucide-react
+// output: HomePage
+// pos: 前端/页面层
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';

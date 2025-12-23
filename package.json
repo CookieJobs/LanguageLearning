@@ -4,9 +4,12 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "build": "npm run build:frontend",
     "dev:frontend": "npm --prefix frontend run dev",
     "build:frontend": "npm --prefix frontend run build",
     "preview:frontend": "npm --prefix frontend run preview",
-    "dev:backend": "npm --prefix backend run dev"
+    "dev:backend": "npm --prefix backend run dev",
+    "docs:enforce": "node tools/enforce-docs.js --write",
+    "docs:check": "node tools/enforce-docs.js"
   }
 }

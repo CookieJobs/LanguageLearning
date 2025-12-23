@@ -1,3 +1,7 @@
+// input: @nestjs/common, node-fetch
+// output: DeepSeekService
+// pos: 后端/学习模块
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import { Injectable } from '@nestjs/common'
 import fetch from 'node-fetch'
 

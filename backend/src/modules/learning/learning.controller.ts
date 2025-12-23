@@ -1,3 +1,7 @@
+// input: @nestjs/common, ../../common/jwt.guard, ../../common/prisma.service, ../stats/stats.service, node-fetch, ./vocab.service, ./deepseek.service
+// output: LearningController, route:learning
+// pos: 后端/学习模块
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import { Body, Controller, Post, UseGuards, Req, Get, Query } from '@nestjs/common'
 import { JwtGuard } from '../../common/jwt.guard'
 import { PrismaService } from '../../common/prisma.service'

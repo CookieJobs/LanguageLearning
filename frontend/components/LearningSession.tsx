@@ -1,3 +1,7 @@
+// input: react, ../types, ./Button, ../services/geminiService, lucide-react
+// output: LearningSession
+// pos: 前端/组件层
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import React, { useState, useRef, useEffect } from 'react';
 import { WordItem, FeedbackResponse } from '../types';
 import { Button } from './Button';
@@ -42,6 +46,24 @@ export const LearningSession: React.FC<LearningSessionProps> = ({
       const t = setTimeout(() => { onReady?.(); }, 150);
       return () => clearTimeout(t);
    }, []);
+
+   useEffect(() => {
+      const handler = (e: KeyboardEvent) => {
+         if (e.key !== 'Enter' || e.shiftKey) return;
+         const target = e.target as HTMLElement | null;
+         if (target && (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT' || target.isContentEditable)) {
+            return;
+         }
+         e.preventDefault();
+         if (feedback?.isCorrect) {
+            handleNext();
+         } else {
+            if (sentence.trim() && !isChecking) handleSubmit();
+         }
+      };
+      window.addEventListener('keydown', handler);
+      return () => window.removeEventListener('keydown', handler);
+   }, [feedback?.isCorrect, sentence, isChecking]);
 
    const handleSubmit = async () => {
       if (!sentence.trim()) return;

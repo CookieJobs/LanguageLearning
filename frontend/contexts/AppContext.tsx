@@ -1,6 +1,11 @@
+// input: react, ../types, ../services/geminiService, ../services/apiClient
+// output: AppProvider, useApp
+// pos: 前端/上下文层
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { EducationLevel, MasteredItem, WordItem } from '../types';
 import { addMastery, fetchWordsForLevel, getMe, logout as apiLogout, getStats, updateMe, fetchMasteryList } from '../services/geminiService';
+import { SESSION_EXPIRED_EVENT } from '../services/apiClient';
 
 type AppContextType = {
   token: string | null;
@@ -26,6 +31,7 @@ type AppContextType = {
   startNextSession: () => Promise<void>;
   dismissSummary: () => void;
   logout: () => Promise<void>;
+  isSessionExpired: boolean;
 };
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -54,6 +60,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [sessionProgress, setSessionProgress] = useState(0);
   const [showSummary, setShowSummary] = useState(false);
   const [streakAtSessionStart, setStreakAtSessionStart] = useState<number>(0);
+  const [isSessionExpired, setIsSessionExpired] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('linguaCraft_mastered', JSON.stringify(masteredItems));
@@ -82,9 +89,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setWordQueue([]);
       setCurrentWordIndex(0);
       setSessionProgress(0);
+      setIsSessionExpired(false);
     };
+    
+    const onSessionExpired = () => {
+        setIsSessionExpired(true);
+    };
+
     window.addEventListener('force-logout', onForceLogout);
-    return () => window.removeEventListener('force-logout', onForceLogout);
+    window.addEventListener(SESSION_EXPIRED_EVENT, onSessionExpired);
+    return () => {
+        window.removeEventListener('force-logout', onForceLogout);
+        window.removeEventListener(SESSION_EXPIRED_EVENT, onSessionExpired);
+    };
   }, []);
 
   const handleLevelSelect = async (selectedLevel: EducationLevel) => {
@@ -201,6 +218,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setWordQueue([]);
     setCurrentWordIndex(0);
     setSessionProgress(0);
+    setIsSessionExpired(false);
   };
 
   const setToken = (t: string | null) => { setTokenState(t); };
@@ -240,7 +258,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     startNextSession,
     dismissSummary,
     logout,
-  }), [token, userEmail, level, meLoaded, wordQueue, currentWordIndex, masteredItems, sessionMastered, isLoading, streak, streakAtSessionStart, sessionProgress, showSummary]);
+    isSessionExpired,
+  }), [token, userEmail, level, meLoaded, wordQueue, currentWordIndex, masteredItems, sessionMastered, isLoading, streak, streakAtSessionStart, sessionProgress, showSummary, isSessionExpired]);
 
   return (<AppContext.Provider value={value}>{children}</AppContext.Provider>);
 };

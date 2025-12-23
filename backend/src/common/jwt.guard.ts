@@ -1,3 +1,7 @@
+// input: @nestjs/common, jsonwebtoken
+// output: JwtGuard
+// pos: 后端/通用层
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common'
 import * as jwt from 'jsonwebtoken'
 
