@@ -21,12 +21,37 @@ export class DeepSeekService {
     }
 
     const messages = [
-      { role: 'system', content: 'You write feedback in Simplified Chinese. Output strict JSON only. improvedSentence must be ENGLISH if present.' },
-      { role: 'user', content: `Word: "${word.word}" (${word.partOfSpeech}, meaning: ${word.definition}). Sentence: "${sentence}". Return {isCorrect:boolean, feedback:string, improvedSentence?:string}.` }
+      {
+        role: 'system',
+        content: `You are an English language tutor. 
+        1. Evaluate the user's sentence based on the target word.
+        2. Output STRICT JSON format only. No markdown code blocks.
+        3. Keys: "isCorrect" (boolean), "feedback" (string, in Simplified Chinese), "improvedSentence" (string, optional English improvement).
+        4. "isCorrect" is true if the sentence uses the target word correctly (grammar/semantics).
+        5. "feedback" should be helpful and encouraging.`
+      },
+      {
+        role: 'user',
+        content: `Target Word: "${word.word}" (${word.partOfSpeech}, meaning: ${word.definition}).
+        User Sentence: "${sentence}".
+        Generate evaluation.`
+      }
     ]
 
-    const res = await this.callApi(messages)
-    return this.parseJSON(res)
+    try {
+      const res = await this.callApi(messages)
+      return this.parseJSON(res)
+    } catch (e) {
+      console.error('Feedback generation failed:', e)
+      // Fallback to local check if API fails
+      const w = String(word?.word || '').toLowerCase()
+      const sent = String(sentence || '').toLowerCase()
+      const ok = w && sent.includes(w)
+      return {
+        isCorrect: ok,
+        feedback: ok ? 'API调用失败，但检测到你使用了目标词。' : 'API调用失败，且未检测到目标词。'
+      }
+    }
   }
 
   async generateStory(words: string[]) {
@@ -89,9 +114,18 @@ export class DeepSeekService {
   }
 
   private parseJSON(text: string) {
-    try { return JSON.parse(text) } catch { }
-    const match = text && text.match(/[\[{][\s\S]*[\]}]/)
-    if (match) return JSON.parse(match[0])
-    throw new Error('No JSON found in response')
+    try {
+      // Remove markdown code blocks if present (e.g. ```json ... ```)
+      const clean = text.replace(/```json\s*|\s*```/g, '').trim()
+      return JSON.parse(clean)
+    } catch (e) {
+      // Try to find JSON object pattern if direct parse fails
+      const match = text && text.match(/\{[\s\S]*\}/)
+      if (match) {
+        try { return JSON.parse(match[0]) } catch { }
+      }
+      console.error('Failed to parse JSON from AI response:', text)
+      throw new Error('Invalid JSON format from AI')
+    }
   }
 }
