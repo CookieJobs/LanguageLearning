@@ -3,7 +3,7 @@
 // pos: 前端/组件层
 // 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import React, { useState } from 'react'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, Trophy, Flame, Home } from 'lucide-react'
 import { generateStory } from '../services/geminiService'
 import { StoryModal } from './StoryModal'
 
@@ -32,7 +32,6 @@ export const SessionSummary: React.FC<SessionSummaryProps> = ({ items, count, st
     setShowStoryModal(true);
 
     try {
-      // Pick up to 5 random words
       const words = items.map(i => i.word);
       const shuffled = words.sort(() => 0.5 - Math.random());
       const selected = shuffled.slice(0, 5);
@@ -49,39 +48,43 @@ export const SessionSummary: React.FC<SessionSummaryProps> = ({ items, count, st
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-      <div className="glass-card rounded-[2rem] shadow-2xl w-full max-w-lg p-8 animate-scale-in">
-        <div className="text-center mb-8">
-          <h3 className="text-2xl font-black text-gray-900 mb-1">学习完成！</h3>
-          <p className="text-gray-500 font-medium">本次掌握内容：</p>
+      <div className="glass-card rounded-3xl shadow-2xl w-full max-w-lg p-8 animate-scale-in">
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 text-white mb-4 shadow-lg shadow-emerald-500/30">
+            <Trophy size={28} />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 mb-1">学习完成！</h3>
+          <p className="text-gray-500 font-medium text-sm">本次学习成果：</p>
         </div>
 
-        <div className="flex items-center justify-center gap-4 mb-8">
-          <div className="inline-flex flex-col items-center justify-center bg-emerald-50 text-emerald-700 px-6 py-3 rounded-2xl border border-emerald-100 min-w-[100px]">
-            <span className="text-2xl font-black">{count}</span>
-            <span className="text-xs font-bold uppercase tracking-wider opacity-80">单词数</span>
+        <div className="flex items-center justify-center gap-4 mb-6">
+          <div className="flex flex-col items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-50 text-emerald-700 px-6 py-4 rounded-2xl border border-emerald-100 min-w-[110px]">
+            <span className="text-3xl font-bold">{count}</span>
+            <span className="text-xs font-semibold uppercase tracking-wider opacity-70 mt-1">单词数</span>
           </div>
-          <div className="inline-flex flex-col items-center justify-center bg-amber-50 text-amber-700 px-6 py-3 rounded-2xl border border-amber-100 min-w-[100px]">
-            <div className="flex items-center gap-1">
-              <span className="text-2xl font-black">{streak}</span>
-              {streakDelta > 0 && <span className="text-xs font-bold bg-amber-200 text-amber-800 px-1.5 py-0.5 rounded-full">+{streakDelta}</span>}
+          <div className="flex flex-col items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50 text-amber-700 px-6 py-4 rounded-2xl border border-amber-100 min-w-[110px]">
+            <div className="flex items-center gap-1.5">
+              <Flame size={20} className="text-orange-500" />
+              <span className="text-3xl font-bold">{streak}</span>
+              {streakDelta > 0 && <span className="text-xs font-bold bg-amber-200 text-amber-800 px-1.5 py-0.5 rounded-full ml-1">+{streakDelta}</span>}
             </div>
-            <span className="text-xs font-bold uppercase tracking-wider opacity-80">连续打卡</span>
+            <span className="text-xs font-semibold uppercase tracking-wider opacity-70 mt-1">连续打卡</span>
           </div>
         </div>
 
-        <div className="max-h-60 overflow-y-auto pr-2 mb-8 custom-scrollbar space-y-3">
+        <div className="max-h-52 overflow-y-auto pr-2 mb-6 space-y-2.5">
           {items.length === 0 ? (
-            <div className="p-6 text-center border-2 border-dashed border-gray-200 rounded-xl">
-              <p className="text-gray-400 font-medium">本次暂无掌握单词。</p>
+            <div className="p-6 text-center border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
+              <p className="text-gray-400 font-medium text-sm">本次暂无掌握单词</p>
             </div>
           ) : (
             items.map((it, idx) => (
-              <div key={idx} className="p-4 bg-white/50 rounded-xl border border-gray-100 hover:bg-white transition-colors">
-                <div className="flex justify-between items-baseline mb-1">
-                  <span className="font-bold text-gray-900 text-lg">{it.word}</span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-200 text-gray-600 px-2 py-0.5 rounded-md">{it.partOfSpeech}</span>
+              <div key={idx} className="p-4 bg-white rounded-xl border border-gray-100 hover:border-gray-200 transition-colors shadow-sm">
+                <div className="flex justify-between items-baseline mb-1.5">
+                  <span className="font-bold text-gray-900">{it.word}</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider bg-brand-50 text-brand-600 px-2 py-0.5 rounded-md border border-brand-100">{it.partOfSpeech}</span>
                 </div>
-                <p className="text-sm text-gray-600 italic">"{it.userSentence}"</p>
+                <p className="text-sm text-gray-500 italic line-clamp-2">"{it.userSentence}"</p>
               </div>
             ))
           )}
@@ -91,18 +94,19 @@ export const SessionSummary: React.FC<SessionSummaryProps> = ({ items, count, st
           {items.length > 0 && (
             <button
               onClick={handleGenerateStory}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold text-lg hover:shadow-lg hover:shadow-purple-500/30 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-600 via-accent-500 to-brand-500 text-white font-bold hover:shadow-lg hover:shadow-brand-500/25 transition-all hover:scale-[1.01] active:scale-[0.98] flex items-center justify-center gap-2"
             >
-              <Sparkles size={20} className="fill-white/20" />
-              <span>生成AI故事 (Story Mode)</span>
+              <Sparkles size={18} />
+              <span>生成 AI 故事</span>
             </button>
           )}
 
           <button
             onClick={onBackHome}
-            className="w-full py-3.5 rounded-xl bg-white border-2 border-gray-100 text-gray-600 font-bold text-lg hover:bg-gray-50 hover:border-gray-200 transition-all"
+            className="w-full py-3.5 rounded-xl bg-white border-2 border-gray-100 text-gray-600 font-bold hover:bg-gray-50 hover:border-gray-200 transition-all flex items-center justify-center gap-2"
           >
-            返回主页
+            <Home size={18} />
+            <span>返回主页</span>
           </button>
         </div>
       </div>

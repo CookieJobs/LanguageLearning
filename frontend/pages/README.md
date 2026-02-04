@@ -4,7 +4,7 @@
 一旦我所属的文件夹有所变化，请更新我。
 
 文件清单：
-- HomePage.tsx — 页面 — 渲染 UI 组件
-- LearnPage.tsx — 页面 — 渲染 UI 组件
-- LoginPage.tsx — 页面 — 渲染 UI 组件
-- ReviewPage.tsx — 页面 — 渲染 UI 组件
+- HomePage.tsx — 页面 — 首页看板与开始学习
+- LearnPage.tsx — 页面 — 学习流程与错误提示
+- LoginPage.tsx — 页面 — 登录/注册
+- ReviewPage.tsx — 页面 — 学习复盘

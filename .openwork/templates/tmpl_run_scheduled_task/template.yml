@@ -1,0 +1,8 @@
+---
+id: "tmpl_run_scheduled_task"
+title: "Run a scheduled task"
+description: "Demo of the scheduler plugin"
+createdAt: 1769162219245
+---
+
+Show me how to schedule a task to run every morning.

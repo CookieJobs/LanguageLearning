@@ -4,16 +4,20 @@
 # 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 version: "3.9"
 services:
-  postgres:
-    image: postgres:16
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: linguacraft
+  mongo:
+    image: mongo:7
     ports:
-      - "5432:5432"
+      - "27017:27017"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - mongodata:/data/db
+  mongo-express:
+    image: mongo-express:1.0
+    environment:
+      - ME_CONFIG_MONGODB_URL=mongodb://mongo:27017
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mongo
   redis:
     image: redis:7
     ports:
@@ -23,7 +27,7 @@ services:
     command: sh -c "npm install && npm run dev"
     environment:
       - API_PORT=5500
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/linguacraft
+      - MONGO_URL=mongodb://mongo:27017/linguacraft
       - REDIS_URL=redis://redis:6379
       - JWT_SECRET=change_me
       - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
@@ -31,7 +35,7 @@ services:
     ports:
       - "5500:5500"
     depends_on:
-      - postgres
+      - mongo
       - redis
 volumes:
-  pgdata:
+  mongodata:

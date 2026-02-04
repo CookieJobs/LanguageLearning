@@ -1,10 +1,11 @@
-// input: argon2, @prisma/client
+// input: argon2, mongoose, ../src/modules/user/user.schema
 // output: 无
 // pos: 系统/通用
 // 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 
 import * as argon2 from 'argon2';
-import { PrismaClient } from '@prisma/client';
+import mongoose from 'mongoose';
+import { UserSchema } from '../src/modules/user/user.schema';
 
 async function main() {
   console.log('Checking environment...');
@@ -21,16 +22,17 @@ async function main() {
     process.exit(1);
   }
 
-  // 2. Check Prisma
+  // 2. Check MongoDB
   try {
-    console.log('Testing Prisma connection...');
-    const prisma = new PrismaClient();
-    await prisma.$connect();
-    const count = await prisma.user.count();
-    console.log(`✅ Prisma connected. User count: ${count}`);
-    await prisma.$disconnect();
+    console.log('Testing MongoDB connection...');
+    const mongoUrl = process.env.MONGO_URL || 'mongodb://localhost:27017/linguacraft';
+    await mongoose.connect(mongoUrl);
+    const User = mongoose.models.User || mongoose.model('User', UserSchema);
+    const count = await User.countDocuments();
+    console.log(`✅ MongoDB connected. User count: ${count}`);
+    await mongoose.disconnect();
   } catch (e) {
-    console.error('❌ Prisma failed:', e);
+    console.error('❌ MongoDB failed:', e);
     process.exit(1);
   }
 

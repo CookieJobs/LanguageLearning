@@ -2,11 +2,19 @@
 // output: fetchWordsForLevel, evaluateSentence, addMastery, fetchMasteryList, logout, getMe, getStats, checkin, getMasteryCount, updateMe, generateStory
 // pos: 前端/服务层
 // 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
-import { EducationLevel, WordItem, FeedbackResponse } from "../types";
+import { EducationLevel, WordItem, FeedbackResponse, ProgressStats } from "../types";
 import { apiFetch } from "./apiClient";
 import { API_BASE } from "./config";
 
 const base = `${API_BASE}/api/learning`;
+
+function toApiError(status: number, data: any) {
+  const code = String(data?.message || data?.error || '').trim() || `HTTP_${status}`
+  const err: any = new Error(code)
+  err.code = code
+  err.status = status
+  return err
+}
 
 function normalizeLevelCode(level: EducationLevel): string {
   const map: Record<string, string> = {
@@ -19,13 +27,13 @@ function normalizeLevelCode(level: EducationLevel): string {
   return map[level] || level;
 }
 
-export const fetchWordsForLevel = async (level: EducationLevel, existingWords: string[] = []): Promise<WordItem[]> => {
+export const fetchWordsForLevel = async (level: EducationLevel, existingWords: string[] = [], textbook?: string): Promise<WordItem[]> => {
   const res = await apiFetch(`${base}/words`, {
     method: "POST",
-    body: JSON.stringify({ level: normalizeLevelCode(level), exclude: existingWords })
+    body: JSON.stringify({ level: normalizeLevelCode(level), exclude: existingWords, textbook })
   })
-  if (!res.ok) throw new Error("Failed to fetch words")
-  const data = await res.json()
+  const data = await res.json().catch(() => null)
+  if (!res.ok) throw toApiError(res.status, data)
   const normalize = (items: any[]): WordItem[] => items.map((it: any) => {
     let def = it.definition
     if (def && typeof def === 'object') {
@@ -57,7 +65,7 @@ export const evaluateSentence = async (word: WordItem, sentence: string): Promis
   }
 };
 
-export const addMastery = async (word: WordItem, userSentence: string, masteredAt?: string): Promise<{ ok: boolean }> => {
+export const addMastery = async (word: WordItem, userSentence: string, masteredAt?: string, sourceLevel?: string): Promise<{ ok: boolean }> => {
   try {
     const res = await apiFetch(`${API_BASE}/api/learning/mastery`, {
       method: "POST",
@@ -67,7 +75,8 @@ export const addMastery = async (word: WordItem, userSentence: string, masteredA
         partOfSpeech: word.partOfSpeech,
         example: word.example,
         userSentence,
-        masteredAt
+        masteredAt,
+        sourceLevel
       })
     })
     return await res.json()
@@ -101,7 +110,7 @@ export const logout = async (): Promise<{ ok: boolean }> => {
   }
 }
 
-export const getMe = async (): Promise<{ id: string; email: string; educationLevel?: string | null }> => {
+export const getMe = async (): Promise<{ id: string; email: string; educationLevel?: string | null; textbook?: string | null }> => {
   const res = await apiFetch(`${API_BASE}/api/me`, {
     method: "GET"
   })
@@ -130,7 +139,7 @@ export const getMasteryCount = async (opts?: { since?: string; level?: string })
   return await res.json()
 }
 
-export const updateMe = async (payload: { educationLevel?: string; name?: string; avatarUrl?: string }): Promise<{ ok: boolean }> => {
+export const updateMe = async (payload: { educationLevel?: string; name?: string; avatarUrl?: string; textbook?: string }): Promise<{ ok: boolean }> => {
   const res = await apiFetch(`${API_BASE}/api/me`, { method: "PATCH", body: JSON.stringify(payload) })
   return await res.json()
 }
@@ -141,5 +150,20 @@ export const generateStory = async (words: string[]): Promise<{ story: string; t
     body: JSON.stringify({ words })
   })
   if (!res.ok) throw new Error("Failed to generate story")
+  return await res.json()
+}
+
+export const fetchTextbooks = async (): Promise<string[]> => {
+  const res = await apiFetch(`${base}/textbooks`, { method: "GET" })
+  const data = await res.json()
+  return data.textbooks || []
+}
+
+export const fetchProgress = async (level?: string, textbook?: string): Promise<ProgressStats> => {
+  const params: string[] = []
+  if (level) params.push(`level=${encodeURIComponent(level)}`)
+  if (textbook) params.push(`textbook=${encodeURIComponent(textbook)}`)
+  const url = params.length ? `${base}/progress?${params.join('&')}` : `${base}/progress`
+  const res = await apiFetch(url, { method: "GET" })
   return await res.json()
 }

@@ -15,17 +15,31 @@ export interface WordItem {
   definition: string;
   partOfSpeech: string;
   example: string;
+  audioUrl?: string;
 }
 
 export interface MasteredItem extends WordItem {
   userSentence: string;
   masteredAt: string;
+  sourceLevel?: EducationLevel;
 }
 
 export interface FeedbackResponse {
   isCorrect: boolean;
   feedback: string;
   improvedSentence?: string;
+}
+
+export interface ProgressStats {
+  totalCount: number;
+  masteredCount: number;
+  list: {
+    word: string;
+    definition: string;
+    mastered: boolean;
+    masteryCount: number;
+    lastMastered: string | null;
+  }[];
 }
 
 export type Screen = 'onboarding' | 'learning' | 'review';

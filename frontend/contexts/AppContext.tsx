@@ -1,5 +1,5 @@
 // input: react, ../types, ../services/geminiService, ../services/apiClient
-// output: AppProvider, useApp
+// output: AppProvider, useApp（含学习加载错误状态）
 // pos: 前端/上下文层
 // 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
@@ -21,6 +21,7 @@ type AppContextType = {
   streak: number;
   streakAtSessionStart: number;
   sessionProgress: number;
+  loadError: { code: string; message: string } | null;
   handleLevelSelect: (selectedLevel: EducationLevel) => Promise<void>;
   handleWordSuccess: (word: WordItem, sentence: string) => Promise<void>;
   handleSkipWord: () => void;
@@ -32,12 +33,15 @@ type AppContextType = {
   dismissSummary: () => void;
   logout: () => Promise<void>;
   isSessionExpired: boolean;
+  selectedTextbook: string | null;
+  handleTextbookSelect: (t: string | null) => void;
 };
 
 const AppContext = createContext<AppContextType | null>(null);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [level, setLevel] = useState<EducationLevel | null>(EducationLevel.PRIMARY);
+  const [selectedTextbook, setSelectedTextbook] = useState<string | null>(null);
   const [meLoaded, setMeLoaded] = useState(false);
   const [wordQueue, setWordQueue] = useState<WordItem[]>([]);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
@@ -61,6 +65,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [showSummary, setShowSummary] = useState(false);
   const [streakAtSessionStart, setStreakAtSessionStart] = useState<number>(0);
   const [isSessionExpired, setIsSessionExpired] = useState(false);
+  const [loadError, setLoadError] = useState<{ code: string; message: string } | null>(null);
 
   useEffect(() => {
     localStorage.setItem('linguaCraft_mastered', JSON.stringify(masteredItems));
@@ -72,8 +77,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       try {
         const me = await getMe();
         setUserEmail(me.email);
-        setLevel(EducationLevel.PRIMARY)
-        try { const s = await getStats(); setStreak(s.currentStreak || 0) } catch {}
+        if (me.educationLevel) setLevel(me.educationLevel as EducationLevel);
+        if (me.textbook) setSelectedTextbook(me.textbook);
+        try { const s = await getStats(); setStreak(s.currentStreak || 0) } catch { }
       } catch {
         setUserEmail(null);
       }
@@ -90,32 +96,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCurrentWordIndex(0);
       setSessionProgress(0);
       setIsSessionExpired(false);
+      setLoadError(null);
     };
-    
+
     const onSessionExpired = () => {
-        setIsSessionExpired(true);
+      setIsSessionExpired(true);
     };
 
     window.addEventListener('force-logout', onForceLogout);
     window.addEventListener(SESSION_EXPIRED_EVENT, onSessionExpired);
     return () => {
-        window.removeEventListener('force-logout', onForceLogout);
-        window.removeEventListener(SESSION_EXPIRED_EVENT, onSessionExpired);
+      window.removeEventListener('force-logout', onForceLogout);
+      window.removeEventListener(SESSION_EXPIRED_EVENT, onSessionExpired);
     };
   }, []);
 
   const handleLevelSelect = async (selectedLevel: EducationLevel) => {
     setIsLoading(true);
-    setLevel(EducationLevel.PRIMARY);
+    setLoadError(null);
+    setLevel(selectedLevel);
+    // Persist to backend
+    if (token) {
+      updateMe({ educationLevel: selectedLevel }).catch(() => { });
+    }
     try {
       let exclude: string[] = masteredItems.map(m => m.word)
       try {
         const list = await fetchMasteryList()
-        exclude = Array.from(new Set([ ...exclude, ...list.map((x:any)=>String(x.word||'')) ]))
-      } catch {}
-      let newWords = await fetchWordsForLevel(EducationLevel.PRIMARY, exclude);
+        exclude = Array.from(new Set([...exclude, ...list.map((x: any) => String(x.word || ''))]))
+      } catch { }
+      let newWords = await fetchWordsForLevel(selectedLevel, exclude, selectedTextbook || undefined);
       if (!newWords || newWords.length === 0) {
-        try { newWords = await fetchWordsForLevel(EducationLevel.PRIMARY, []) } catch {}
+        try { newWords = await fetchWordsForLevel(selectedLevel, []) } catch { }
       }
       setWordQueue(newWords || []);
       setCurrentWordIndex(0);
@@ -125,7 +137,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setStreakAtSessionStart(streak || 0);
       setIsLoading(false);
     } catch (error) {
-      alert('启动失败，请检查您的网络连接或 API Key。');
+      setLoadError(toLoadError(error));
       setIsLoading(false);
     }
   };
@@ -135,30 +147,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...word,
       userSentence: sentence,
       masteredAt: new Date().toISOString(),
+      sourceLevel: level || EducationLevel.PRIMARY,
     };
     setMasteredItems(prev => [newItem, ...prev]);
     setSessionMastered(prev => [newItem, ...prev]);
     setSessionProgress(p => p + 1);
-    try { await addMastery(word, sentence, newItem.masteredAt) } catch {}
+    try { await addMastery(word, sentence, newItem.masteredAt, newItem.sourceLevel) } catch { }
     try {
       const today = new Date();
       const toStr = (d: Date) => {
-        const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,'0'); const dd = String(d.getDate()).padStart(2,'0');
+        const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, '0'); const dd = String(d.getDate()).padStart(2, '0');
         return `${y}-${m}-${dd}`;
       };
-      const parse = (s: string) => { const [y,m,d] = s.split('-').map(Number); return new Date(y, (m||1)-1, d||1); };
+      const parse = (s: string) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, (m || 1) - 1, d || 1); };
       const todayStr = toStr(today);
       const raw = localStorage.getItem('linguaCraft_streak');
       let next = 1; let lastDateStr: string | null = null;
       if (raw) {
-        try { const s = JSON.parse(raw); lastDateStr = s?.lastDate || null; const last = lastDateStr ? parse(lastDateStr) : null;
+        try {
+          const s = JSON.parse(raw); lastDateStr = s?.lastDate || null; const last = lastDateStr ? parse(lastDateStr) : null;
           if (lastDateStr === todayStr) next = s?.count || 1;
-          else if (last) { const diffDays = Math.floor((today.getTime() - last.getTime())/86400000); next = diffDays === 1 ? (s?.count || 0) + 1 : 1; }
+          else if (last) { const diffDays = Math.floor((today.getTime() - last.getTime()) / 86400000); next = diffDays === 1 ? (s?.count || 0) + 1 : 1; }
         } catch { next = 1; }
       }
       localStorage.setItem('linguaCraft_streak', JSON.stringify({ count: next, lastDate: todayStr }));
       setStreak(next);
-    } catch {}
+    } catch { }
     moveToNextWord();
   };
 
@@ -177,25 +191,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setWordQueue([]);
     setCurrentWordIndex(0);
     setSessionProgress(0);
+    setLoadError(null);
   };
 
   const exitLearning = () => {
     setWordQueue([]);
     setCurrentWordIndex(0);
     setSessionProgress(0);
+    setLoadError(null);
   };
 
   const startNextSession = async () => {
     setIsLoading(true)
+    setLoadError(null)
+    const currentLevel = level || EducationLevel.PRIMARY;
     try {
       let exclude: string[] = [...masteredItems.map(m => m.word)]
       try {
         const list = await fetchMasteryList()
-        exclude = Array.from(new Set([ ...exclude, ...list.map((x:any)=>String(x.word||'')) ]))
-      } catch {}
-      let moreWords = await fetchWordsForLevel(EducationLevel.PRIMARY, exclude)
+        exclude = Array.from(new Set([...exclude, ...list.map((x: any) => String(x.word || ''))]))
+      } catch { }
+      let moreWords = await fetchWordsForLevel(currentLevel, exclude, selectedTextbook || undefined)
       if (!moreWords || moreWords.length === 0) {
-        try { moreWords = await fetchWordsForLevel(EducationLevel.PRIMARY, []) } catch {}
+        try { moreWords = await fetchWordsForLevel(currentLevel, []) } catch { }
       }
       setWordQueue(moreWords || [])
       setCurrentWordIndex(0)
@@ -203,14 +221,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setSessionProgress(0)
       setShowSummary(false)
       setStreakAtSessionStart(streak || 0)
-    } catch {}
+    } catch (error) {
+      setLoadError(toLoadError(error))
+    }
     setIsLoading(false)
   }
 
   const dismissSummary = () => { setShowSummary(false) }
 
   const logout = async () => {
-    try { await apiLogout() } catch {}
+    try { await apiLogout() } catch { }
     localStorage.removeItem('linguaCraft_token');
     localStorage.removeItem('linguaCraft_refresh');
     setTokenState(null);
@@ -219,12 +239,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentWordIndex(0);
     setSessionProgress(0);
     setIsSessionExpired(false);
+    setLoadError(null);
   };
 
   const setToken = (t: string | null) => { setTokenState(t); };
 
   function normalizeLevel(level: EducationLevel): string {
-    switch(level) {
+    switch (level) {
       case EducationLevel.PRIMARY: return 'Primary'
       case EducationLevel.MIDDLE: return 'Middle'
       case EducationLevel.HIGH: return 'High'
@@ -232,6 +253,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       case EducationLevel.PROFESSIONAL: return 'Professional'
       default: return String(level)
     }
+  }
+
+  function toLoadError(error: any): { code: string; message: string } {
+    const code = String(error?.code || error?.message || 'unknown')
+    if (code === 'unauthorized' || code === 'TOKEN_EXPIRED' || code === '401') {
+      return { code: 'TOKEN_EXPIRED', message: '登录已过期，请重新登录。' }
+    }
+    if (code === 'VOCAB_EMPTY') {
+      return { code: 'VOCAB_EMPTY', message: '词库未初始化或正在导入，请稍后再试。' }
+    }
+    if (code === 'DB_NOT_READY') {
+      return { code: 'DB_NOT_READY', message: '数据库未就绪，请稍后重试。' }
+    }
+    return { code: 'UNKNOWN', message: '加载失败，请检查后端服务或网络连接。' }
   }
 
   const value = useMemo<AppContextType>(() => ({
@@ -248,6 +283,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     streak,
     streakAtSessionStart,
     sessionProgress,
+    loadError,
     handleLevelSelect,
     handleWordSuccess,
     handleSkipWord,
@@ -259,7 +295,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     dismissSummary,
     logout,
     isSessionExpired,
-  }), [token, userEmail, level, meLoaded, wordQueue, currentWordIndex, masteredItems, sessionMastered, isLoading, streak, streakAtSessionStart, sessionProgress, showSummary, isSessionExpired]);
+    selectedTextbook,
+    handleTextbookSelect: (t) => {
+      setSelectedTextbook(t);
+      if (token) {
+        updateMe({ textbook: t || '' }).catch(() => { });
+      }
+    }
+  }), [token, userEmail, level, meLoaded, wordQueue, currentWordIndex, masteredItems, sessionMastered, isLoading, streak, streakAtSessionStart, sessionProgress, showSummary, isSessionExpired, loadError, selectedTextbook]);
 
   return (<AppContext.Provider value={value}>{children}</AppContext.Provider>);
 };

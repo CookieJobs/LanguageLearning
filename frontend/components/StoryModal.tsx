@@ -3,7 +3,7 @@
 // pos: 前端/组件层
 // 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import React, { useState } from 'react';
-import { Languages } from 'lucide-react';
+import { Languages, RefreshCw, X, BookOpen } from 'lucide-react';
 
 interface StoryModalProps {
     story: string | null;
@@ -18,47 +18,52 @@ export const StoryModal: React.FC<StoryModalProps> = ({ story, translation, isLo
     const [showTranslation, setShowTranslation] = useState(true);
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
-            <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden animate-scale-in flex flex-col max-h-[85vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-fade-in">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-scale-in flex flex-col max-h-[85vh]">
 
                 {/* Header */}
-                <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-violet-50 to-indigo-50">
-                    <h2 className="text-xl font-black bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-2">
-                        <span>📖</span> ✨ 故事时间
+                <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-brand-50 via-accent-50/50 to-brand-50">
+                    <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2.5">
+                        <div className="p-2 bg-gradient-to-br from-brand-500 to-accent-500 rounded-xl text-white shadow-sm">
+                            <BookOpen size={16} />
+                        </div>
+                        故事时间
                     </h2>
-                    <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-white hover:text-gray-600 hover:shadow-md transition-all">
-                        ✕
+                    <button onClick={onClose} className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-all">
+                        <X size={18} />
                     </button>
                 </div>
 
                 {/* Content */}
-                <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-white">
+                <div className="p-6 overflow-y-auto flex-1 bg-white">
                     {isLoading ? (
-                        <div className="flex flex-col items-center justify-center py-12 space-y-6">
+                        <div className="flex flex-col items-center justify-center py-16 space-y-5">
                             <div className="relative">
-                                <div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-500 rounded-full animate-spin"></div>
-                                <div className="absolute inset-0 flex items-center justify-center text-xl">✨</div>
+                                <div className="w-16 h-16 border-[3px] border-brand-100 rounded-full"></div>
+                                <div className="absolute inset-0 w-16 h-16 border-[3px] border-transparent border-t-brand-500 rounded-full animate-spin"></div>
                             </div>
-                            <p className="text-gray-500 font-medium animate-pulse">正在为您编织故事...</p>
+                            <p className="text-gray-500 font-medium text-sm">正在为您编织故事...</p>
                         </div>
                     ) : error ? (
-                        <div className="text-center py-12">
-                            <div className="text-5xl mb-4 grayscale opacity-50">😿</div>
-                            <p className="text-red-500 font-bold mb-6">{error}</p>
+                        <div className="text-center py-16">
+                            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400">
+                                <BookOpen size={28} />
+                            </div>
+                            <p className="text-red-500 font-semibold mb-5">{error}</p>
                             <button
                                 onClick={onGenerate}
-                                className="px-6 py-2.5 bg-red-50 text-red-600 rounded-full hover:bg-red-100 font-bold transition-colors"
+                                className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 font-semibold transition-colors"
                             >
                                 重试
                             </button>
                         </div>
                     ) : story ? (
-                        <div className="space-y-8">
+                        <div className="space-y-6">
                             <div className="prose max-w-none">
-                                <div className="text-lg leading-loose text-gray-800 font-medium">
+                                <div className="text-base leading-loose text-gray-700">
                                     {story.split(/(\*\*.*?\*\*)/).map((part, index) =>
                                         part.startsWith('**') && part.endsWith('**') ? (
-                                            <span key={index} className="font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-lg border border-indigo-100 mx-0.5 shadow-sm">
+                                            <span key={index} className="font-bold text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded-lg border border-brand-100 mx-0.5">
                                                 {part.slice(2, -2)}
                                             </span>
                                         ) : (
@@ -69,13 +74,16 @@ export const StoryModal: React.FC<StoryModalProps> = ({ story, translation, isLo
                             </div>
 
                             {translation && (
-                                <div className="relative pt-6 border-t border-dashed border-gray-200">
-                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 bg-white text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1 cursor-pointer hover:text-indigo-500 transition-colors" onClick={() => setShowTranslation(!showTranslation)}>
-                                        <Languages size={14} />
+                                <div className="relative pt-5 border-t border-dashed border-gray-200">
+                                    <button
+                                        className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-white text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1 cursor-pointer hover:text-brand-500 transition-colors rounded-full border border-gray-100"
+                                        onClick={() => setShowTranslation(!showTranslation)}
+                                    >
+                                        <Languages size={12} />
                                         {showTranslation ? '隐藏翻译' : '显示翻译'}
-                                    </div>
+                                    </button>
                                     <div className={`transition-all duration-300 overflow-hidden ${showTranslation ? 'opacity-100 max-h-[500px]' : 'opacity-0 max-h-0'}`}>
-                                        <p className="text-gray-500 leading-loose text-base bg-gray-50 p-4 rounded-xl">
+                                        <p className="text-gray-500 leading-relaxed text-sm bg-gray-50 p-4 rounded-xl mt-2">
                                             {translation}
                                         </p>
                                     </div>
@@ -83,26 +91,27 @@ export const StoryModal: React.FC<StoryModalProps> = ({ story, translation, isLo
                             )}
                         </div>
                     ) : (
-                        <div className="text-center py-10 text-gray-400 font-medium">
+                        <div className="text-center py-14 text-gray-400 font-medium">
                             准备好生成故事了吗？
                         </div>
                     )}
                 </div>
 
                 {/* Footer */}
-                <div className="p-5 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 z-10">
+                <div className="p-4 border-t border-gray-100 bg-gray-50/80 flex justify-end gap-2.5">
                     <button
                         onClick={onClose}
-                        className="px-5 py-2.5 rounded-xl text-gray-600 font-bold hover:bg-gray-200 transition-colors"
+                        className="px-4 py-2.5 rounded-xl text-gray-600 font-semibold hover:bg-gray-200 transition-colors"
                     >
                         关闭
                     </button>
                     {!isLoading && story && (
                         <button
                             onClick={onGenerate}
-                            className="px-5 py-2.5 rounded-xl bg-gray-900 text-white font-bold hover:bg-black shadow-lg shadow-gray-900/20 transition-all active:scale-95 flex items-center gap-2"
+                            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-gray-800 to-gray-900 text-white font-semibold hover:from-gray-900 hover:to-black shadow-lg shadow-gray-900/20 transition-all active:scale-95 flex items-center gap-2"
                         >
-                            <span>🔄</span> 生成新故事
+                            <RefreshCw size={16} />
+                            <span>生成新故事</span>
                         </button>
                     )}
                 </div>
