@@ -13,7 +13,9 @@ async function main() {
   const items = JSON.parse(raw)
   const mongoUrl = process.env.MONGO_URL || 'mongodb://localhost:27017/linguacraft'
   await mongoose.connect(mongoUrl)
-  const VocabWord = mongoose.models.VocabWord || mongoose.model('VocabWord', VocabWordSchema)
+  const VocabWord =
+    (mongoose.models.VocabWord as mongoose.Model<any>) ||
+    mongoose.model('VocabWord', VocabWordSchema)
   const ops = items.map((it: any) => ({
     updateOne: {
       filter: { lemma: it.lemma, pos: it.pos },
@@ -39,9 +41,11 @@ async function main() {
   const batchSize = 500
   for (let i = 0; i < ops.length; i += batchSize) {
     const chunk = ops.slice(i, i + batchSize)
-    await VocabWord.bulkWrite(chunk, { ordered: false })
+    await (VocabWord as any).bulkWrite(chunk, { ordered: false })
   }
   await mongoose.disconnect()
 }
 
-main().finally(async ()=>{ await mongoose.disconnect() })
+main().finally(async () => {
+  await mongoose.disconnect()
+})
