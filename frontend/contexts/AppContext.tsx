@@ -1,10 +1,6 @@
-// input: react, ../types, ../services/geminiService, ../services/apiClient
-// output: AppProvider, useApp（含学习加载错误状态）
-// pos: 前端/上下文层
-// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { EducationLevel, MasteredItem, WordItem } from '../types';
-import { addMastery, fetchWordsForLevel, getMe, logout as apiLogout, getStats, updateMe, fetchMasteryList } from '../services/geminiService';
+import { EducationLevel, MasteredItem, Question } from '../types';
+import { getMe, logout as apiLogout, getStats, updateMe, fetchSessionQuestions, submitAnswer } from '../services/geminiService';
 import { SESSION_EXPIRED_EVENT } from '../services/apiClient';
 
 type AppContextType = {
@@ -13,8 +9,8 @@ type AppContextType = {
   userEmail: string | null;
   level: EducationLevel | null;
   meLoaded: boolean;
-  wordQueue: WordItem[];
-  currentWordIndex: number;
+  sessionQueue: Question[];
+  currentIndex: number;
   masteredItems: MasteredItem[];
   sessionMastered: MasteredItem[];
   isLoading: boolean;
@@ -23,9 +19,9 @@ type AppContextType = {
   sessionProgress: number;
   loadError: { code: string; message: string } | null;
   handleLevelSelect: (selectedLevel: EducationLevel) => Promise<void>;
-  handleWordSuccess: (word: WordItem, sentence: string) => Promise<void>;
-  handleSkipWord: () => void;
-  moveToNextWord: () => void;
+  handleQuestionSuccess: (question: Question, answer: any) => Promise<void>;
+  handleSkip: () => void;
+  moveToNext: () => void;
   resetToHome: () => void;
   exitLearning: () => void;
   showSummary: boolean;
@@ -43,8 +39,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [level, setLevel] = useState<EducationLevel | null>(EducationLevel.PRIMARY);
   const [selectedTextbook, setSelectedTextbook] = useState<string | null>(null);
   const [meLoaded, setMeLoaded] = useState(false);
-  const [wordQueue, setWordQueue] = useState<WordItem[]>([]);
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [sessionQueue, setSessionQueue] = useState<Question[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [masteredItems, setMasteredItems] = useState<MasteredItem[]>(() => {
     const saved = localStorage.getItem('linguaCraft_mastered');
     return saved ? JSON.parse(saved) : [];
@@ -92,8 +88,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const onForceLogout = () => {
       setTokenState(null);
       setLevel(null);
-      setWordQueue([]);
-      setCurrentWordIndex(0);
+      setSessionQueue([]);
+      setCurrentIndex(0);
       setSessionProgress(0);
       setIsSessionExpired(false);
       setLoadError(null);
@@ -111,6 +107,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, []);
 
+  function normalizeLevel(level: EducationLevel): string {
+    switch (level) {
+      case EducationLevel.PRIMARY: return 'Primary'
+      case EducationLevel.MIDDLE: return 'Middle'
+      case EducationLevel.HIGH: return 'High'
+      case EducationLevel.UNIVERSITY: return 'University'
+      case EducationLevel.PROFESSIONAL: return 'Professional'
+      default: return String(level)
+    }
+  }
+
+  const startNextSession = async (overrideLevel?: EducationLevel) => {
+    setIsLoading(true)
+    setLoadError(null)
+    const currentLevel = overrideLevel || level || EducationLevel.PRIMARY;
+    try {
+      const questions = await fetchSessionQuestions(normalizeLevel(currentLevel), selectedTextbook || undefined)
+      
+      setSessionQueue(questions || [])
+      setCurrentIndex(0)
+      setSessionMastered([])
+      setSessionProgress(0)
+      setShowSummary(false)
+      setStreakAtSessionStart(streak || 0)
+    } catch (error) {
+      setLoadError(toLoadError(error))
+    }
+    setIsLoading(false)
+  }
+
   const handleLevelSelect = async (selectedLevel: EducationLevel) => {
     setIsLoading(true);
     setLoadError(null);
@@ -119,40 +145,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (token) {
       updateMe({ educationLevel: selectedLevel }).catch(() => { });
     }
-    try {
-      let exclude: string[] = masteredItems.map(m => m.word)
-      try {
-        const list = await fetchMasteryList()
-        exclude = Array.from(new Set([...exclude, ...list.map((x: any) => String(x.word || ''))]))
-      } catch { }
-      let newWords = await fetchWordsForLevel(selectedLevel, exclude, selectedTextbook || undefined);
-      if (!newWords || newWords.length === 0) {
-        try { newWords = await fetchWordsForLevel(selectedLevel, []) } catch { }
-      }
-      setWordQueue(newWords || []);
-      setCurrentWordIndex(0);
-      setSessionProgress(0);
-      setSessionMastered([]);
-      setShowSummary(false);
-      setStreakAtSessionStart(streak || 0);
-      setIsLoading(false);
-    } catch (error) {
-      setLoadError(toLoadError(error));
-      setIsLoading(false);
-    }
+    await startNextSession(selectedLevel);
   };
 
-  const handleWordSuccess = async (word: WordItem, sentence: string) => {
-    const newItem: MasteredItem = {
-      ...word,
-      userSentence: sentence,
-      masteredAt: new Date().toISOString(),
-      sourceLevel: level || EducationLevel.PRIMARY,
-    };
-    setMasteredItems(prev => [newItem, ...prev]);
-    setSessionMastered(prev => [newItem, ...prev]);
+  const handleQuestionSuccess = async (question: Question, answer: any) => {
+    if (question.type === 'sentence') {
+        const newItem: MasteredItem = {
+          ...question.word,
+          userSentence: answer,
+          masteredAt: new Date().toISOString(),
+          sourceLevel: level || EducationLevel.PRIMARY,
+        };
+        setMasteredItems(prev => [newItem, ...prev]);
+        setSessionMastered(prev => [newItem, ...prev]);
+    }
     setSessionProgress(p => p + 1);
-    try { await addMastery(word, sentence, newItem.masteredAt, newItem.sourceLevel) } catch { }
+    
+    // Submit to backend
+    try { 
+        await submitAnswer(question.wordId, true, question.type === 'sentence' ? answer : undefined) 
+    } catch { }
+
     try {
       const today = new Date();
       const toStr = (d: Date) => {
@@ -173,59 +186,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.setItem('linguaCraft_streak', JSON.stringify({ count: next, lastDate: todayStr }));
       setStreak(next);
     } catch { }
-    moveToNextWord();
+    moveToNext();
   };
 
-  const handleSkipWord = () => { moveToNextWord(); };
+  const handleSkip = () => { moveToNext(); };
 
-  const moveToNextWord = async () => {
-    const nextIndex = currentWordIndex + 1;
-    if (nextIndex >= wordQueue.length) {
+  const moveToNext = async () => {
+    const nextIndex = currentIndex + 1;
+    if (nextIndex >= sessionQueue.length) {
       setShowSummary(true);
     } else {
-      setCurrentWordIndex(nextIndex);
+      setCurrentIndex(nextIndex);
     }
   };
 
   const resetToHome = () => {
-    setWordQueue([]);
-    setCurrentWordIndex(0);
+    setSessionQueue([]);
+    setCurrentIndex(0);
     setSessionProgress(0);
     setLoadError(null);
   };
 
   const exitLearning = () => {
-    setWordQueue([]);
-    setCurrentWordIndex(0);
+    setSessionQueue([]);
+    setCurrentIndex(0);
     setSessionProgress(0);
     setLoadError(null);
   };
-
-  const startNextSession = async () => {
-    setIsLoading(true)
-    setLoadError(null)
-    const currentLevel = level || EducationLevel.PRIMARY;
-    try {
-      let exclude: string[] = [...masteredItems.map(m => m.word)]
-      try {
-        const list = await fetchMasteryList()
-        exclude = Array.from(new Set([...exclude, ...list.map((x: any) => String(x.word || ''))]))
-      } catch { }
-      let moreWords = await fetchWordsForLevel(currentLevel, exclude, selectedTextbook || undefined)
-      if (!moreWords || moreWords.length === 0) {
-        try { moreWords = await fetchWordsForLevel(currentLevel, []) } catch { }
-      }
-      setWordQueue(moreWords || [])
-      setCurrentWordIndex(0)
-      setSessionMastered([])
-      setSessionProgress(0)
-      setShowSummary(false)
-      setStreakAtSessionStart(streak || 0)
-    } catch (error) {
-      setLoadError(toLoadError(error))
-    }
-    setIsLoading(false)
-  }
 
   const dismissSummary = () => { setShowSummary(false) }
 
@@ -235,25 +222,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.removeItem('linguaCraft_refresh');
     setTokenState(null);
     setLevel(null);
-    setWordQueue([]);
-    setCurrentWordIndex(0);
+    setSessionQueue([]);
+    setCurrentIndex(0);
     setSessionProgress(0);
     setIsSessionExpired(false);
     setLoadError(null);
   };
 
   const setToken = (t: string | null) => { setTokenState(t); };
-
-  function normalizeLevel(level: EducationLevel): string {
-    switch (level) {
-      case EducationLevel.PRIMARY: return 'Primary'
-      case EducationLevel.MIDDLE: return 'Middle'
-      case EducationLevel.HIGH: return 'High'
-      case EducationLevel.UNIVERSITY: return 'University'
-      case EducationLevel.PROFESSIONAL: return 'Professional'
-      default: return String(level)
-    }
-  }
 
   function toLoadError(error: any): { code: string; message: string } {
     const code = String(error?.code || error?.message || 'unknown')
@@ -275,8 +251,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     userEmail,
     level,
     meLoaded,
-    wordQueue,
-    currentWordIndex,
+    sessionQueue,
+    currentIndex,
     masteredItems,
     sessionMastered,
     isLoading,
@@ -285,13 +261,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     sessionProgress,
     loadError,
     handleLevelSelect,
-    handleWordSuccess,
-    handleSkipWord,
-    moveToNextWord,
+    handleQuestionSuccess,
+    handleSkip,
+    moveToNext,
     resetToHome,
     exitLearning,
     showSummary,
-    startNextSession,
+    startNextSession: () => startNextSession(),
     dismissSummary,
     logout,
     isSessionExpired,
@@ -302,7 +278,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateMe({ textbook: t || '' }).catch(() => { });
       }
     }
-  }), [token, userEmail, level, meLoaded, wordQueue, currentWordIndex, masteredItems, sessionMastered, isLoading, streak, streakAtSessionStart, sessionProgress, showSummary, isSessionExpired, loadError, selectedTextbook]);
+  }), [token, userEmail, level, meLoaded, sessionQueue, currentIndex, masteredItems, sessionMastered, isLoading, streak, streakAtSessionStart, sessionProgress, showSummary, isSessionExpired, loadError, selectedTextbook]);
 
   return (<AppContext.Provider value={value}>{children}</AppContext.Provider>);
 };

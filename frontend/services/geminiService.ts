@@ -2,11 +2,29 @@
 // output: fetchWordsForLevel, evaluateSentence, addMastery, fetchMasteryList, logout, getMe, getStats, checkin, getMasteryCount, updateMe, generateStory
 // pos: 前端/服务层
 // 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
-import { EducationLevel, WordItem, FeedbackResponse, ProgressStats } from "../types";
+import { EducationLevel, WordItem, FeedbackResponse, ProgressStats, Question } from "../types";
 import { apiFetch } from "./apiClient";
 import { API_BASE } from "./config";
 
 const base = `${API_BASE}/api/learning`;
+
+export const fetchSessionQuestions = async (level?: string, textbook?: string): Promise<Question[]> => {
+  const params: string[] = []
+  if (level) params.push(`level=${encodeURIComponent(level)}`)
+  if (textbook) params.push(`textbook=${encodeURIComponent(textbook)}`)
+  const url = params.length ? `${base}/session?${params.join('&')}` : `${base}/session`
+  const res = await apiFetch(url, { method: "GET" })
+  const data = await res.json()
+  return data.questions || []
+}
+
+export const submitAnswer = async (wordId: string, isCorrect: boolean, userSentence?: string): Promise<any> => {
+  const res = await apiFetch(`${base}/submit`, {
+    method: "POST",
+    body: JSON.stringify({ wordId, isCorrect, userSentence })
+  })
+  return await res.json()
+}
 
 function toApiError(status: number, data: any) {
   const code = String(data?.message || data?.error || '').trim() || `HTTP_${status}`

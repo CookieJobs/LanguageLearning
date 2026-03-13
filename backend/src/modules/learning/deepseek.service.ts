@@ -41,15 +41,23 @@ export class DeepSeekService {
     try {
       const res = await this.callApi(messages)
       return this.parseJSON(res)
-    } catch (e) {
+    } catch (e: any) {
       console.error('Feedback generation failed:', e)
+      
+      let errorMsg = 'API调用失败';
+      if (e.message && e.message.includes('401')) {
+        errorMsg = 'API Key 无效或过期';
+      } else if (e.message && e.message.includes('429')) {
+        errorMsg = 'API余额不足或请求过于频繁';
+      }
+
       // Fallback to local check if API fails
       const w = String(word?.word || '').toLowerCase()
       const sent = String(sentence || '').toLowerCase()
       const ok = w && sent.includes(w)
       return {
         isCorrect: ok,
-        feedback: ok ? 'API调用失败，但检测到你使用了目标词。' : 'API调用失败，且未检测到目标词。'
+        feedback: ok ? `${errorMsg}，但检测到你使用了目标词。` : `${errorMsg}，且未检测到目标词。`
       }
     }
   }

@@ -4,7 +4,7 @@
 // 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { Model } from 'mongoose'
+import { Model, Types } from 'mongoose'
 import { VocabWordDocument } from './vocab.schema'
 
 type Level = 'Primary' | 'Middle' | 'High' | 'University' | 'Professional'
@@ -67,5 +67,21 @@ export class VocabService {
   async listHeadwordsByLevel(level: string): Promise<string[]> {
     const words = await this.vocabModel.find({ levels: level }).select({ headword: 1 }).lean()
     return words.map(w => String(w.headword || '')).filter(Boolean)
+  }
+
+  async getRandomDistractors(count: number, excludeId: string, level?: string): Promise<VocabWordDocument[]> {
+    const query: any = { _id: { $ne: excludeId } }
+    if (level) {
+      query.levels = level
+    }
+    const countDocs = await this.vocabModel.countDocuments(query)
+    if (countDocs < count) {
+      return this.vocabModel.find(query).limit(count).exec()
+    }
+    
+    return this.vocabModel.aggregate([
+      { $match: { _id: { $ne: new Types.ObjectId(excludeId) }, ...(level ? { levels: level } : {}) } },
+      { $sample: { size: count } }
+    ]).exec() as unknown as VocabWordDocument[]
   }
 }

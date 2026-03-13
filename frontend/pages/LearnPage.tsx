@@ -10,22 +10,22 @@ import { useApp } from '../contexts/AppContext';
 import { RefreshCw, LogIn, BookOpen } from 'lucide-react';
 
 export const LearnPage: React.FC = () => {
-  const { wordQueue, currentWordIndex, handleWordSuccess, handleSkipWord, exitLearning, showSummary, sessionMastered, startNextSession, streak, streakAtSessionStart, isLoading, loadError, logout } = useApp();
+  const { sessionQueue, currentIndex, handleQuestionSuccess, handleSkip, exitLearning, showSummary, sessionMastered, startNextSession, streak, streakAtSessionStart, isLoading, loadError, logout } = useApp();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (wordQueue.length === 0) { startNextSession(); }
+    if (sessionQueue.length === 0) { startNextSession(); }
   }, []);
 
   return (
     <div className="flex-grow flex flex-col h-[calc(100vh-64px)] animate-fade-in relative overflow-hidden">
-      {wordQueue.length > 0 && !showSummary ? (
+      {sessionQueue.length > 0 && !showSummary ? (
         <LearningSession
-          word={wordQueue[currentWordIndex]}
-          currentIndex={currentWordIndex}
-          totalCount={wordQueue.length}
-          onSuccess={handleWordSuccess}
-          onSkip={handleSkipWord}
+          question={sessionQueue[currentIndex]}
+          currentIndex={currentIndex}
+          totalCount={sessionQueue.length}
+          onSuccess={handleQuestionSuccess}
+          onSkip={handleSkip}
           onExit={() => { exitLearning(); navigate('/'); }}
           onReady={() => { }}
         />

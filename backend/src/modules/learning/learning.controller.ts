@@ -15,6 +15,8 @@ import fetch from 'node-fetch'
 import { Response } from 'express'
 
 import { DeepSeekService } from './deepseek.service'
+import { LearningSchedulerService } from './learning-scheduler.service'
+import { QuestionGeneratorService } from './question-generator.service'
 
 @Controller('learning')
 export class LearningController {
@@ -24,8 +26,90 @@ export class LearningController {
     private stats: StatsService,
     private deepseek: DeepSeekService,
     private textbookService: TextbookService,
-    private progressService: ProgressService
+    private progressService: ProgressService,
+    private scheduler: LearningSchedulerService,
+    private questionGenerator: QuestionGeneratorService
   ) { }
+
+  @Get('session') @UseGuards(JwtGuard)
+  async getSession(@Req() req: any, @Query('level') level?: string, @Query('textbook') textbook?: string) {
+    const userId = req.user.id
+    const dueItems = await this.scheduler.getDueWords(userId, 10)
+    
+    const questions: any[] = []
+    
+    // Process due items
+    for (const item of dueItems) {
+      const word = item.wordId as any
+      if (!word) continue
+
+      let q: any
+      if (item.stage <= 1) {
+        const mode = Math.random() > 0.5 ? 'en-zh' : 'zh-en'
+        q = await this.questionGenerator.generateChoiceQuestion(word, mode)
+      } else if (item.stage === 2) {
+        q = await this.questionGenerator.generateQuizQuestion(word)
+      } else {
+        // Stage 3: Sentence
+        q = {
+          wordId: String(word._id),
+          type: 'sentence',
+          questionText: `Please write a sentence using "${word.headword}".`,
+          answer: word.headword
+        }
+      }
+      
+      if (q) {
+        q.progressId = String(item._id)
+        q.word = {
+            word: word.headword,
+            definition: word.definitionZh, // Use Chinese definition for now as primary
+            partOfSpeech: word.pos,
+            example: word.exampleEn,
+            audioUrl: word.audioUrl
+        }
+        questions.push(q)
+      }
+    }
+
+    // Fill with new words if needed
+    if (questions.length < 10 && level) {
+       const countNeeded = 10 - questions.length
+       const allLearned = await this.scheduler.getAllLearnedWordIds(userId)
+       
+       const normalize = (s: string) => {
+          const map: Record<string, any> = {
+            'Primary School (小学)': 'Primary', 'Junior High School (初中)': 'Middle', 'Senior High School (高中)': 'High', 'University (大学/四六级)': 'University', 'Professional/Study Abroad (雅思/托福/职场)': 'Professional'
+          }
+          return map[s] || s
+       }
+       const levelCode = normalize(level)
+       
+       try {
+           const newWords = await this.vocab.pickWords(levelCode, allLearned, countNeeded, Math.random().toString(), textbook)
+           
+           for (const word of newWords) {
+               const w = word as any
+                const mode = Math.random() > 0.5 ? 'en-zh' : 'zh-en'
+                const q: any = await this.questionGenerator.generateChoiceQuestion(w, mode)
+                q.word = {
+                    word: w.headword,
+                    definition: w.definitionZh,
+                    partOfSpeech: w.pos,
+                    example: w.exampleEn,
+                    audioUrl: w.audioUrl
+               }
+               questions.push(q)
+           }
+       } catch (e) {
+           // ignore VOCAB_EMPTY or others
+       }
+    }
+    
+    return {
+      questions
+    }
+  }
 
   @Get('textbooks')
   async listTextbooks() {
@@ -99,6 +183,13 @@ export class LearningController {
       throw e
     }
   }
+
+  @Post('submit') @UseGuards(JwtGuard)
+  async submit(@Body() body: { wordId: string; isCorrect: boolean; userSentence?: string }, @Req() req: any) {
+    if (!body.wordId) throw new BadRequestException('wordId is required')
+    return this.scheduler.submitAnswer(req.user.id, body.wordId, body.isCorrect, body.userSentence)
+  }
+
   @Post('evaluate') @UseGuards(JwtGuard)
   async evaluate(@Body() body: { word: any; sentence: string }) {
     return this.deepseek.evaluateSentence(body.word, body.sentence)

@@ -13,6 +13,9 @@ import { TextbookService } from './textbook.service'
 import { ProgressService } from './progress.service'
 import { VocabWordSchema } from './vocab.schema'
 import { WordMasterySchema } from './mastery.schema'
+import { UserWordProgressSchema } from './user-word-progress.schema'
+import { LearningSchedulerService } from './learning-scheduler.service'
+import { QuestionGeneratorService } from './question-generator.service'
 import { UserSchema } from '../user/user.schema'
 import { StatsModule } from '../stats/stats.module'
 import { VocabSeedService } from './vocab-seed.service'
@@ -23,11 +26,25 @@ import { JwtGuard } from '../../common/jwt.guard'
     MongooseModule.forFeature([
       { name: 'User', schema: UserSchema },
       { name: 'VocabWord', schema: VocabWordSchema },
-      { name: 'WordMastery', schema: WordMasterySchema }
+      { name: 'WordMastery', schema: WordMasterySchema },
+      { name: 'UserWordProgress', schema: UserWordProgressSchema }
     ]),
     StatsModule
   ],
   controllers: [LearningController, StoryController],
-  providers: [JwtGuard, VocabService, DeepSeekService, VocabSeedService, TextbookService, ProgressService]
+  providers: [
+    JwtGuard, 
+    VocabService, 
+    DeepSeekService, 
+    VocabSeedService, 
+    TextbookService, 
+    ProgressService,
+    LearningSchedulerService,
+    QuestionGeneratorService
+  ],
+  exports: [
+    LearningSchedulerService,
+    QuestionGeneratorService
+  ]
 })
 export class LearningModule { }

@@ -42,4 +42,22 @@ export interface ProgressStats {
   }[];
 }
 
+export interface QuestionOption {
+  id: string;
+  text: string;
+  isCorrect?: boolean; // Optional, might be hidden in some implementations
+}
+
+export type QuestionType = 'choice' | 'quiz' | 'sentence';
+
+export interface Question {
+  wordId: string;
+  type: QuestionType;
+  questionText: string;
+  options?: QuestionOption[];
+  answer?: string;
+  progressId?: string;
+  word: WordItem; // Context word
+}
+
 export type Screen = 'onboarding' | 'learning' | 'review';
