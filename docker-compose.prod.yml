@@ -1,0 +1,88 @@
+version: "3.9"
+
+services:
+  # MongoDB 数据库
+  mongo:
+    image: mongo:7
+    container_name: linguacraft-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+    restart: unless-stopped
+    networks:
+      - linguacraft-network
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    container_name: linguacraft-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - linguacraft-network
+
+  # 后端 API 服务
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.simple
+    container_name: linguacraft-backend
+    environment:
+      - API_PORT=5500
+      - MONGO_URL=mongodb://mongo:27017/linguacraft
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET:-please_replace_with_a_strong_random_secret_12345}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - DEEPSEEK_MODEL=${DEEPSEEK_MODEL:-deepseek-chat}
+    ports:
+      - "5500:5500"
+    depends_on:
+      - mongo
+      - redis
+    restart: unless-stopped
+    networks:
+      - linguacraft-network
+
+  # 前端应用
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: linguacraft-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=production
+      - VITE_API_URL=http://localhost:5500
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - linguacraft-network
+
+  # Nginx 反向代理
+  nginx:
+    image: nginx:alpine
+    container_name: linguacraft-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+    networks:
+      - linguacraft-network
+
+volumes:
+  mongodata:
+
+networks:
+  linguacraft-network:
+    driver: bridge

@@ -37,3 +37,46 @@
 - 任意功能、架构、写法的改动完成后，必须同步更新受影响目录的 `README.md` 与相关文件的开头注释（input/output/pos）。
 - 未同步更新视为变更未完成；提交请包含对应文档同步。
 - 每个目录必须维护：三行极简架构说明（≤3行）+“一旦我所属的文件夹有所变化，请更新我。”声明+文件清单（文件名/地位/功能）。
+
+## 生产环境部署
+
+### 使用 Docker Compose 部署
+1. **准备环境变量**：
+   ```bash
+   # 复制环境变量模板
+   cp .env.example .env
+   # 编辑 .env 文件，设置以下变量：
+   # DEEPSEEK_API_KEY=your_deepseek_api_key_here
+   # JWT_SECRET=your_secure_jwt_secret_here
+   ```
+
+2. **使用生产配置**：
+   ```bash
+   # 复制生产配置模板
+   cp docker-compose.prod.yml.example docker-compose.prod.yml
+   # 启动所有服务
+   docker-compose -f docker-compose.prod.yml up -d
+   ```
+
+3. **验证部署**：
+   ```bash
+   # 检查服务状态
+   docker-compose -f docker-compose.prod.yml ps
+   
+   # 测试健康检查
+   curl http://localhost:5500/api/health
+   
+   # 访问前端
+   curl http://localhost
+   ```
+
+### 部署修复说明
+本次部署修复解决了以下问题：
+1. **Docker构建问题**：在 `backend/Dockerfile` 中添加了构建工具以支持原生模块
+2. **环境变量安全**：生产配置使用环境变量而非硬编码密钥
+3. **Nginx配置**：正确配置了前端服务端口 (5173)
+
+### 安全注意事项
+- 不要将包含真实API密钥的 `.env` 文件提交到版本控制
+- 定期更换 JWT_SECRET 和 API 密钥
+- 使用强密码保护数据库和Redis服务
