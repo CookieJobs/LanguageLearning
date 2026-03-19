@@ -2,13 +2,16 @@
 // output: SessionSummary
 // pos: 前端/组件层
 // 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Sparkles, Trophy, Flame, Home } from 'lucide-react'
 import { generateStory } from '../services/geminiService'
 import { StoryModal } from './StoryModal'
+import { usePet } from '../contexts/PetContext'
+
+import { Button } from './Button'
 
 interface SessionSummaryProps {
-  items: Array<{ word: string; userSentence: string; masteredAt: string; partOfSpeech: string }>
+  items: Array<{ word: string; stage: 'new' | 'familiar' | 'mastered' }>
   count: number
   streak: number
   streakDelta: number
@@ -21,6 +24,15 @@ export const SessionSummary: React.FC<SessionSummaryProps> = ({ items, count, st
   const [translation, setTranslation] = useState<string | undefined>(undefined);
   const [loadingStory, setLoadingStory] = useState(false);
   const [storyError, setStoryError] = useState<string | null>(null);
+  
+  const { refreshPet } = usePet();
+  const [showEnergyRestored, setShowEnergyRestored] = useState(false);
+
+  useEffect(() => {
+    refreshPet();
+    const timer = setTimeout(() => setShowEnergyRestored(true), 800);
+    return () => clearTimeout(timer);
+  }, [refreshPet]);
 
   const handleGenerateStory = async () => {
     if (items.length === 0) return;
@@ -48,43 +60,49 @@ export const SessionSummary: React.FC<SessionSummaryProps> = ({ items, count, st
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-      <div className="glass-card rounded-3xl shadow-2xl w-full max-w-lg p-8 animate-scale-in">
+      <div className="bg-white rounded-3xl border-2 border-gray-200 border-b-4 shadow-xl w-full max-w-lg p-8 animate-scale-in">
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 text-white mb-4 shadow-lg shadow-emerald-500/30">
+          <div className="relative inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-green-100 text-duo-green mb-4 border-2 border-duo-green border-b-4">
             <Trophy size={28} />
+            {showEnergyRestored && (
+                <div className="absolute -top-3 -right-16 bg-duo-yellow text-yellow-900 text-xs font-extrabold px-2 py-1 rounded-lg border-2 border-yellow-500 animate-bounce shadow-sm whitespace-nowrap z-10">
+                    Energy Restored!
+                </div>
+            )}
           </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-1">学习完成！</h3>
-          <p className="text-gray-500 font-medium text-sm">本次学习成果：</p>
+          <h3 className="text-2xl font-bold text-gray-900 mb-1">学习成果</h3>
+          <p className="text-gray-500 font-bold text-sm">本次学习情况：</p>
         </div>
 
         <div className="flex items-center justify-center gap-4 mb-6">
-          <div className="flex flex-col items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-50 text-emerald-700 px-6 py-4 rounded-2xl border border-emerald-100 min-w-[110px]">
-            <span className="text-3xl font-bold">{count}</span>
-            <span className="text-xs font-semibold uppercase tracking-wider opacity-70 mt-1">单词数</span>
+          <div className="flex flex-col items-center justify-center bg-gray-50 text-gray-700 px-6 py-4 rounded-2xl border-2 border-gray-200 border-b-4 min-w-[110px]">
+            <span className="text-3xl font-extrabold">{count}</span>
+            <span className="text-xs font-bold uppercase tracking-wider opacity-70 mt-1">单词数</span>
           </div>
-          <div className="flex flex-col items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50 text-amber-700 px-6 py-4 rounded-2xl border border-amber-100 min-w-[110px]">
+          <div className="flex flex-col items-center justify-center bg-gray-50 text-gray-700 px-6 py-4 rounded-2xl border-2 border-gray-200 border-b-4 min-w-[110px]">
             <div className="flex items-center gap-1.5">
-              <Flame size={20} className="text-orange-500" />
-              <span className="text-3xl font-bold">{streak}</span>
+              <Flame size={20} className="text-orange-500 fill-orange-500" />
+              <span className="text-3xl font-extrabold">{streak}</span>
               {streakDelta > 0 && <span className="text-xs font-bold bg-amber-200 text-amber-800 px-1.5 py-0.5 rounded-full ml-1">+{streakDelta}</span>}
             </div>
-            <span className="text-xs font-semibold uppercase tracking-wider opacity-70 mt-1">连续打卡</span>
+            <span className="text-xs font-bold uppercase tracking-wider opacity-70 mt-1">连续打卡</span>
           </div>
         </div>
 
         <div className="max-h-52 overflow-y-auto pr-2 mb-6 space-y-2.5">
           {items.length === 0 ? (
-            <div className="p-6 text-center border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
-              <p className="text-gray-400 font-medium text-sm">本次暂无掌握单词</p>
+            <div className="p-6 text-center border-2 border-dashed border-gray-200 rounded-xl bg-gray-50">
+              <p className="text-gray-400 font-bold text-sm">本次暂无学习单词</p>
             </div>
           ) : (
             items.map((it, idx) => (
-              <div key={idx} className="p-4 bg-white rounded-xl border border-gray-100 hover:border-gray-200 transition-colors shadow-sm">
-                <div className="flex justify-between items-baseline mb-1.5">
-                  <span className="font-bold text-gray-900">{it.word}</span>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider bg-brand-50 text-brand-600 px-2 py-0.5 rounded-md border border-brand-100">{it.partOfSpeech}</span>
+              <div key={idx} className="flex items-center justify-between p-4 bg-white rounded-xl border-2 border-gray-200 border-b-4 hover:border-gray-300 transition-colors">
+                <span className="font-bold text-gray-900 text-lg">{it.word}</span>
+                <div className="flex-shrink-0">
+                  {it.stage === 'new' && <span className="text-xs font-bold text-green-700 bg-green-100 px-2.5 py-1 rounded-full border border-green-200">🌱 初识</span>}
+                  {it.stage === 'familiar' && <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2.5 py-1 rounded-full border border-blue-200">🌿 熟悉</span>}
+                  {it.stage === 'mastered' && <span className="text-xs font-bold text-amber-700 bg-amber-100 px-2.5 py-1 rounded-full border border-amber-200">🌳 掌握</span>}
                 </div>
-                <p className="text-sm text-gray-500 italic line-clamp-2">"{it.userSentence}"</p>
               </div>
             ))
           )}
@@ -92,22 +110,24 @@ export const SessionSummary: React.FC<SessionSummaryProps> = ({ items, count, st
 
         <div className="flex flex-col gap-3">
           {items.length > 0 && (
-            <button
+            <Button
               onClick={handleGenerateStory}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-600 via-accent-500 to-brand-500 text-white font-bold hover:shadow-lg hover:shadow-brand-500/25 transition-all hover:scale-[1.01] active:scale-[0.98] flex items-center justify-center gap-2"
+              variant="secondary"
+              className="w-full py-3.5"
             >
               <Sparkles size={18} />
               <span>生成 AI 故事</span>
-            </button>
+            </Button>
           )}
 
-          <button
+          <Button
             onClick={onBackHome}
-            className="w-full py-3.5 rounded-xl bg-white border-2 border-gray-100 text-gray-600 font-bold hover:bg-gray-50 hover:border-gray-200 transition-all flex items-center justify-center gap-2"
+            variant="primary"
+            className="w-full py-3.5"
           >
             <Home size={18} />
             <span>返回主页</span>
-          </button>
+          </Button>
         </div>
       </div>
 

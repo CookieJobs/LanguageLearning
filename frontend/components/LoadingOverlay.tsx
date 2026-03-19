@@ -21,7 +21,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ visible, message
 
   if (!mounted) return null;
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-white/80 backdrop-blur-md" style={{ opacity, transition: `opacity ${durationMs}ms ease` }}>
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-white" style={{ opacity, transition: `opacity ${durationMs}ms ease` }}>
       <div className="flex flex-col items-center space-y-5">
         <div className="relative">
           <div className="w-14 h-14 border-[3px] border-brand-100 rounded-full"></div>

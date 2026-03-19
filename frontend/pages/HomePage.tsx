@@ -1,32 +1,52 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
+import { Card } from '../components/Card';
+import { Button } from '../components/Button';
+import PetDisplay from '../components/PetDisplay';
 import { getMasteryCount, fetchProgress } from '../services/geminiService';
-import { EducationLevel } from '../types';
-import { Trophy, Target, BookOpen, ChevronRight, Zap } from 'lucide-react';
+import { EducationLevel, ProgressStats } from '../types';
+import { ChevronRight, Zap } from 'lucide-react';
+import { DashboardProgress } from '../components/DashboardProgress';
+import { ProgressDetailsModal, ProgressWordItem } from '../components/ProgressDetailsModal';
 
 export const HomePage: React.FC = () => {
-  const { isLoading, streak, startNextSession, level: currentLevel, handleLevelSelect, loadError, selectedTextbook } = useApp();
+  const { isLoading, startNextSession, level: currentLevel, loadError, selectedTextbook } = useApp();
   const navigate = useNavigate();
   const [masteryCount, setMasteryCount] = useState<number>(0)
   const [contextProgress, setContextProgress] = useState<{ mastered: number, total: number } | null>(null);
+  const [fullProgressStats, setFullProgressStats] = useState<ProgressStats | null>(null);
+  const [isStatsLoading, setIsStatsLoading] = useState<boolean>(true);
+
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [modalWords, setModalWords] = useState<ProgressWordItem[]>([]);
 
   useEffect(() => {
     (async () => {
       try {
+        setIsStatsLoading(true);
         const [res, prog] = await Promise.all([
           getMasteryCount(),
           fetchProgress(currentLevel || undefined, selectedTextbook || undefined)
         ])
         setMasteryCount(res.count || 0)
-        if (prog) setContextProgress({ mastered: prog.masteredCount, total: prog.totalCount })
-      } catch { }
+        if (prog) {
+          setContextProgress({ mastered: prog.masteredCount, total: prog.totalCount });
+          setFullProgressStats(prog);
+        }
+      } catch (err) {
+        console.error("Failed to fetch progress", err);
+      } finally {
+        setIsStatsLoading(false);
+      }
     })()
   }, [currentLevel, selectedTextbook])
 
   return (
-    <div className="pb-16">
-      <main className="max-w-5xl mx-auto px-5 py-6">
+    <div className="pb-16 bg-gray-50/50 min-h-screen">
+      <main className="max-w-6xl mx-auto px-5 py-8">
         <div className="mb-8 animate-fade-in flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight mb-2">
@@ -42,97 +62,94 @@ export const HomePage: React.FC = () => {
           </div>
         )}
 
-        {/* Main Action Area (Hero) */}
-        <div className="relative group overflow-hidden rounded-3xl shadow-xl animate-scale-in mb-10">
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"></div>
-
-          {/* Decorative blobs */}
-          <div className="absolute top-0 right-0 w-80 h-80 bg-brand-500 rounded-full blur-[80px] opacity-25 translate-x-1/3 -translate-y-1/3 group-hover:opacity-35 transition-opacity duration-700"></div>
-          <div className="absolute bottom-0 left-0 w-60 h-60 bg-accent-500 rounded-full blur-[60px] opacity-20 -translate-x-1/3 translate-y-1/3"></div>
-
-          <div className="relative z-10 p-6 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="max-w-md text-center md:text-left">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 text-white/80 text-xs font-semibold uppercase tracking-wider mb-4">
-                <Zap size={12} className="text-amber-300" />
-                推荐练习
-              </div>
-              <h3 className="text-2xl md:text-4xl font-black text-white mb-3 leading-tight tracking-tight">
-                {selectedTextbook ? selectedTextbook.split('2024')[1] || selectedTextbook : `${levelLabelShort(currentLevel)}词汇挑战`}
-              </h3>
-              <p className="text-gray-400 text-lg leading-relaxed font-medium">
-                挑战属于您的单词库，强化记忆链接。
-              </p>
-            </div>
-
-            <button
-              disabled={isLoading}
-              onClick={async () => { navigate('/learn'); if (!isLoading) await startNextSession(); }}
-              className={`flex items-center gap-3 px-8 py-5 rounded-2xl font-bold text-lg transition-all duration-300 ${isLoading
-                ? 'bg-white/10 text-white/50 cursor-not-allowed'
-                : 'bg-white text-gray-900 hover:scale-[1.03] hover:shadow-2xl hover:shadow-white/10 active:scale-[0.98]'
-                }`}
-            >
-              <span>立即开始</span>
-              <div className="bg-brand-500 rounded-full p-1 text-white">
-                <ChevronRight size={20} />
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-          {/* Streak Card */}
-          <div className="glass-card p-6 rounded-2xl flex items-center justify-between hover:-translate-y-0.5 transition-all duration-300 group">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-br from-orange-100 to-amber-100 rounded-xl text-orange-600 shadow-sm group-hover:shadow-md transition-shadow">
-                <Target size={24} strokeWidth={2.5} />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-gray-900">{streak} <span className="text-base font-medium text-gray-400">天</span></div>
-                <div className="text-xs text-gray-500 font-semibold uppercase tracking-wider">连续坚持</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Contextual Progress Card */}
-          <div onClick={() => navigate('/review')} className="glass-card p-6 rounded-2xl flex flex-col justify-center hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group hover:border-emerald-200">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl text-emerald-600 shadow-sm group-hover:shadow-md group-hover:from-emerald-200 group-hover:to-teal-200 transition-all">
-                  <Trophy size={24} strokeWidth={2.5} />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {contextProgress ? contextProgress.mastered : 0}
-                    <span className="text-base font-medium text-gray-400"> / {contextProgress ? contextProgress.total : 0} 词</span>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          {/* Left Column: Actions and Stats */}
+          <div className="lg:col-span-2 flex flex-col gap-6 lg:gap-8">
+            
+            {/* Main Action Area (Hero) */}
+            <div className="relative group overflow-hidden rounded-3xl bg-duo-blue border-b-8 border-duo-blue-dark animate-scale-in">
+              <div className="relative z-10 p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
+                <div className="max-w-md text-center md:text-left">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-black/20 text-white text-xs font-bold uppercase tracking-wider mb-4">
+                    <Zap size={14} className="text-duo-yellow fill-current" />
+                    推荐练习
                   </div>
-                  <div className="text-xs text-gray-500 font-semibold uppercase tracking-wider flex items-center gap-1">
-                    学习进度
-                    <span className="text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded text-[10px]">
-                      {selectedTextbook ? '当前教材' : '当前学段'}
-                    </span>
-                  </div>
+                  <h3 className="text-3xl md:text-4xl font-black text-white mb-4 leading-tight tracking-tight drop-shadow-sm">
+                    {selectedTextbook ? selectedTextbook.split('2024')[1] || selectedTextbook : `${levelLabelShort(currentLevel)}词汇挑战`}
+                  </h3>
+                  <p className="text-blue-100 text-lg leading-relaxed font-bold">
+                    挑战属于您的单词库，强化记忆链接。
+                  </p>
                 </div>
-              </div>
-              <div className="text-emerald-600">
-                <ChevronRight size={20} className="opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0" />
+
+                <Button
+                  disabled={isLoading}
+                  onClick={async () => { navigate('/learn'); if (!isLoading) await startNextSession(); }}
+                  variant="duo-primary"
+                  className="px-10 py-5 text-xl h-auto"
+                >
+                  <span className="flex items-center gap-3">
+                    <span>立即开始</span>
+                    <div className="bg-white/20 rounded-lg p-1">
+                        <ChevronRight size={24} strokeWidth={3} />
+                    </div>
+                  </span>
+                </Button>
               </div>
             </div>
 
-            {/* Progress Bar */}
-            <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
-              <div
-                className="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-out relative"
-                style={{ width: `${contextProgress ? (contextProgress.mastered / (contextProgress.total || 1)) * 100 : 0}%` }}
-              >
-                <div className="absolute inset-0 bg-white/20 animate-pulse-slow"></div>
-              </div>
+            {/* Dashboard Progress Component */}
+            <div className="animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+              <DashboardProgress 
+                stats={fullProgressStats} 
+                isLoading={isStatsLoading} 
+                onClick={() => navigate('/review')}
+                onCategoryClick={(category) => {
+                  if (fullProgressStats && fullProgressStats.list) {
+                    let filtered: ProgressWordItem[] = [];
+                    switch (category) {
+                      case 'mastered':
+                        filtered = fullProgressStats.list.filter(w => w.mastered);
+                        break;
+                      case 'learning':
+                        filtered = fullProgressStats.list.filter(w => w.learning);
+                        break;
+                      case 'toReview':
+                        filtered = fullProgressStats.list.filter(w => w.toReview);
+                        break;
+                      case 'struggling':
+                        filtered = fullProgressStats.list.filter(w => w.struggling);
+                        break;
+                      case 'new':
+                        filtered = fullProgressStats.list.filter(w => !w.mastered && !w.learning);
+                        break;
+                      default:
+                        filtered = [];
+                    }
+                    setModalWords(filtered);
+                    setSelectedCategory(category);
+                    setIsModalOpen(true);
+                  }
+                }} 
+              />
             </div>
+
+          </div>
+
+          {/* Right Column: Pet Display */}
+          <div className="lg:col-span-1 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+            <PetDisplay />
           </div>
         </div>
 
       </main>
+
+      <ProgressDetailsModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        category={selectedCategory}
+        words={modalWords}
+      />
     </div>
   )
 };

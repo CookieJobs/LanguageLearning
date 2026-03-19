@@ -20,6 +20,10 @@ export class StatsService {
     const stats = await this.statsModel.findOne({ userId }).lean()
     return stats || { currentStreak: 0, longestStreak: 0, lastActivityDate: null, totalMastered: 0, id: '', userId }
   }
+  async getCalendar(userId: string) {
+    const activities = await this.activityModel.find({ userId }).select('date').lean()
+    return activities.map(a => a.date)
+  }
   async checkin(userId: string, date?: Date) {
     const now = date ? new Date(date) : new Date()
     const todayKey = startOfDayUTC(now)

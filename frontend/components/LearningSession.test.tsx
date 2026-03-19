@@ -27,11 +27,31 @@ vi.mock('../services/geminiService', () => ({
   evaluateSentence: vi.fn()
 }));
 
-// Mock Audio
-global.Audio = vi.fn().mockImplementation(() => ({
-  play: vi.fn().mockResolvedValue(undefined),
-  catch: vi.fn()
+vi.mock('../contexts/PetContext', () => ({
+  usePet: () => ({
+    refreshWallet: vi.fn(),
+    refreshPet: vi.fn(),
+  })
 }));
+
+// Mock Audio
+global.Audio = vi.fn().mockImplementation(function() {
+  return {
+    play: vi.fn().mockResolvedValue(undefined),
+    catch: vi.fn(),
+    pause: vi.fn(),
+    currentTime: 0
+  };
+}) as any;
+
+// Mock speechSynthesis
+Object.defineProperty(window, 'speechSynthesis', {
+  value: {
+    cancel: vi.fn(),
+    speak: vi.fn()
+  },
+  writable: true
+});
 
 describe('LearningSession Keyboard Interaction', () => {
   afterEach(() => {
@@ -59,9 +79,9 @@ describe('LearningSession Keyboard Interaction', () => {
     fireEvent.keyDown(window, { key: '2' });
 
     // The component should update. We can check if the button for "Option 2" has selected style.
-    // In our implementation, selected button has `border-brand-500`
+    // In our implementation, selected button has `border-duo-blue`
     const opt2 = screen.getByText('Option 2').closest('button');
-    expect(opt2).toHaveClass('border-brand-500');
+    expect(opt2).toHaveClass('border-duo-blue');
   });
 
   it('submits answer when Enter is pressed with selection', async () => {
@@ -117,5 +137,56 @@ describe('LearningSession Keyboard Interaction', () => {
     fireEvent.keyDown(window, { key: 'Enter' });
 
     expect(handleSuccess).toHaveBeenCalled();
+  });
+});
+
+describe('LearningSession Layout & DOM Position', () => {
+  afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
+  });
+
+  it('renders feedback and question side-by-side without layout shift', async () => {
+    render(
+      <LearningSession
+        question={mockQuestion}
+        currentIndex={0}
+        totalCount={10}
+        onSuccess={() => {}}
+        onSkip={() => {}}
+        onExit={() => {}}
+      />
+    );
+
+    const questionContainer = screen.getByTestId('question-container');
+    const feedbackContainer = screen.getByTestId('feedback-container');
+
+    // Both containers should be present in the DOM immediately
+    expect(questionContainer).toBeInTheDocument();
+    expect(feedbackContainer).toBeInTheDocument();
+
+    // The parent of these containers should have flex-row related layout classes
+    const flexRowParent = questionContainer.parentElement;
+    expect(flexRowParent).toHaveClass('flex', 'w-full', 'justify-center', 'items-start');
+    
+    // Test the gap requirement
+    expect(flexRowParent).toHaveClass('gap-2', 'md:gap-4');
+
+    // Verify width distribution for mobile/desktop responsiveness
+    expect(feedbackContainer).toHaveClass('w-[40%]', 'md:flex-1', 'max-w-[320px]', 'shrink');
+    expect(questionContainer).toHaveClass('w-[60%]', 'md:w-[540px]', 'shrink');
+
+    // Select option 1 and submit to show feedback
+    fireEvent.keyDown(window, { key: '1' });
+    await act(async () => {
+      fireEvent.keyDown(window, { key: 'Enter' });
+    });
+
+    // Feedback should appear inside the feedback container
+    expect(screen.getAllByText('Correct!')[0]).toBeInTheDocument();
+    expect(feedbackContainer).toContainElement(screen.getAllByText('Correct!')[0]);
+    
+    // Verify that the feedback container structure maintains layout
+    // The items-start on flexRowParent prevents height changes from pushing items up
   });
 });

@@ -33,12 +33,23 @@ export interface FeedbackResponse {
 export interface ProgressStats {
   totalCount: number;
   masteredCount: number;
+  mastered: number;
+  learning: number;
+  new: number;
+  toReview: number;
+  struggling: number;
   list: {
     word: string;
     definition: string;
     mastered: boolean;
+    learning: boolean;
+    toReview: boolean;
+    struggling: boolean;
     masteryCount: number;
     lastMastered: string | null;
+    stage: number;
+    wrongCount: number;
+    nextReviewAt: string | null;
   }[];
 }
 
@@ -61,3 +72,37 @@ export interface Question {
 }
 
 export type Screen = 'onboarding' | 'learning' | 'review';
+
+export interface Pet {
+  _id: string;
+  userId: string;
+  name: string;
+  level: number;
+  exp: number;
+  hunger: number;
+  energy: number;
+  appearance: {
+    type: string;
+    color: string;
+    [key: string]: any;
+  };
+  lastInteractedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface WalletTransaction {
+  type: 'earn' | 'spend';
+  amount: number;
+  reason: string;
+  createdAt: string;
+}
+
+export interface Wallet {
+  _id: string;
+  userId: string;
+  balance: number;
+  transactions: WalletTransaction[];
+  createdAt?: string;
+  updatedAt?: string;
+}

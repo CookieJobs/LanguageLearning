@@ -18,6 +18,12 @@ export interface VocabWord {
   levels: string[]
   topics: string[]
   textbooks?: string[]
+  source?: string
+  contextualDefinitions?: {
+    textbook: string
+    definitionZh: string
+    exampleEn: string
+  }[]
 }
 
 export type VocabWordDocument = HydratedDocument<VocabWord>
@@ -35,7 +41,15 @@ export const VocabWordSchema = new Schema<VocabWord>({
   audioUrl: { type: String },
   levels: { type: [String], default: [] },
   topics: { type: [String], default: [] },
-  textbooks: { type: [String], default: [] }
+  textbooks: { type: [String], default: [] },
+  source: { type: String },
+  contextualDefinitions: [
+    {
+      textbook: { type: String, required: true },
+      definitionZh: { type: String, required: true },
+      exampleEn: { type: String, required: true }
+    }
+  ]
 })
 
 VocabWordSchema.index({ lemma: 1, pos: 1 }, { unique: true })

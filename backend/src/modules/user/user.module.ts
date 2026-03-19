@@ -14,6 +14,7 @@ import { JwtGuard } from '../../common/jwt.guard'
     { name: 'UserProfile', schema: UserProfileSchema }
   ])],
   controllers: [UserController],
-  providers: [JwtGuard]
+  providers: [JwtGuard],
+  exports: [MongooseModule]
 })
 export class UserModule {}

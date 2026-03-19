@@ -5,6 +5,8 @@ import { UserWordProgress } from './user-word-progress.schema'
 import { WordMastery } from './mastery.schema'
 import { VocabWord } from './vocab.schema'
 import { StatsService } from '../stats/stats.service'
+import { PetService } from '../pet/pet.service'
+import { WalletService } from '../wallet/wallet.service'
 
 @Injectable()
 export class LearningSchedulerService {
@@ -12,7 +14,9 @@ export class LearningSchedulerService {
     @InjectModel('UserWordProgress') private userWordProgressModel: Model<UserWordProgress>,
     @InjectModel('WordMastery') private wordMasteryModel: Model<WordMastery>,
     @InjectModel('VocabWord') private vocabWordModel: Model<VocabWord>,
-    private statsService: StatsService
+    private statsService: StatsService,
+    private petService: PetService,
+    private walletService: WalletService
   ) {}
 
   /**
@@ -66,6 +70,11 @@ export class LearningSchedulerService {
       progress.correctCount += 1
       progress.consecutiveCorrect = (progress.consecutiveCorrect || 0) + 1
 
+      // Reward for correct answer
+      await this.walletService.addCoins(userId, 1, 'correct_answer')
+      await this.petService.addExp(userId, 1)
+      await this.petService.restoreEnergy(userId, 2)
+
       const previousStage = progress.stage
 
       // Progression Logic
@@ -78,6 +87,10 @@ export class LearningSchedulerService {
       const updateMasteryWithSentence = progress.stage === 3 && !!userSentence
 
       if (justMastered || updateMasteryWithSentence) {
+        // Bonus for mastery
+        await this.walletService.addCoins(userId, 10, 'word_mastered')
+        await this.petService.addExp(userId, 10)
+
         // Fetch VocabWord details
         const vocabWord = await this.vocabWordModel.findById(wordId)
         if (vocabWord) {

@@ -9,6 +9,8 @@ import * as argon2 from 'argon2'
 import * as jwt from 'jsonwebtoken'
 import { RefreshTokenDocument } from './refresh-token.schema'
 import { UserDocument } from '../user/user.schema'
+import { PetService } from '../pet/pet.service'
+import { WalletService } from '../wallet/wallet.service'
 
 export interface Tokens { accessToken: string; refreshToken: string }
 
@@ -16,7 +18,9 @@ export interface Tokens { accessToken: string; refreshToken: string }
 export class AuthService {
   constructor(
     @InjectModel('User') private userModel: Model<UserDocument>,
-    @InjectModel('RefreshToken') private refreshModel: Model<RefreshTokenDocument>
+    @InjectModel('RefreshToken') private refreshModel: Model<RefreshTokenDocument>,
+    private petService: PetService,
+    private walletService: WalletService
   ) { }
   private signTokens(userId: string): Tokens {
     const secret = process.env.JWT_SECRET || 'dev_secret'
@@ -31,6 +35,11 @@ export class AuthService {
       if (exist) throw new BadRequestException('email_exists')
       const hash = await argon2.hash(password)
       const user = await this.userModel.create({ email, passwordHash: hash })
+      
+      // Initialize Pet and Wallet
+      await this.petService.createDefault(String(user._id))
+      await this.walletService.createDefault(String(user._id))
+      
       const tokens = this.signTokens(String(user._id))
       await this.storeRefresh(String(user._id), tokens.refreshToken)
       return { userId: String(user._id), ...tokens }

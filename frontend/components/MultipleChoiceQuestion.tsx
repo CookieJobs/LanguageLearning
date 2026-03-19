@@ -30,17 +30,17 @@ export const MultipleChoiceQuestion: React.FC<MultipleChoiceQuestionProps> = ({
              
              if (showFeedback) {
                 if (isCorrect) {
-                   className += "border-emerald-500 bg-emerald-50 text-emerald-900 shadow-md shadow-emerald-500/10";
+                   className += "border-duo-green bg-green-50 text-green-900 shadow-none border-b-4 border-[#46a302]";
                 } else if (isSelected) {
-                   className += "border-red-500 bg-red-50 text-red-900";
+                   className += "border-duo-red bg-red-50 text-red-900 shadow-none border-b-4 border-[#ea2b2b]";
                 } else {
-                   className += "border-gray-100 text-gray-400 opacity-60";
+                   className += "border-gray-100 text-gray-400 opacity-60 border-b-2";
                 }
              } else {
                 if (isSelected) {
-                   className += "border-brand-500 bg-brand-50 text-brand-900 shadow-lg shadow-brand-500/10 ring-1 ring-brand-500/20 scale-[1.01]";
+                   className += "border-duo-blue bg-sky-50 text-sky-900 ring-2 ring-duo-blue/20 border-b-4 border-[#1899d6] active:border-b-0 active:translate-y-1 active:ring-0";
                 } else {
-                   className += "border-gray-200 hover:border-brand-300 hover:bg-gray-50 text-gray-700 hover:shadow-sm active:scale-[0.99]";
+                   className += "border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 border-b-4 border-gray-200 active:border-b-0 active:translate-y-1";
                 }
              }
 
@@ -58,10 +58,10 @@ export const MultipleChoiceQuestion: React.FC<MultipleChoiceQuestionProps> = ({
                     <span className="font-medium text-lg md:text-xl text-left">{opt.text}</span>
                  </div>
                  <div className="ml-auto flex items-center">
-                    {showFeedback && isCorrect && <CheckCircle2 className="text-emerald-500 shrink-0" size={24} />}
-                    {showFeedback && isSelected && !isCorrect && <XCircle className="text-red-500 shrink-0" size={24} />}
-                    {!showFeedback && isSelected && <div className="w-6 h-6 rounded-full border-[6px] border-brand-500 shrink-0"></div>}
-                    {!showFeedback && !isSelected && <div className="w-6 h-6 rounded-full border-2 border-gray-200 group-hover:border-brand-300 shrink-0"></div>}
+                    {showFeedback && isCorrect && <CheckCircle2 className="text-duo-green shrink-0" size={24} />}
+                    {showFeedback && isSelected && !isCorrect && <XCircle className="text-duo-red shrink-0" size={24} />}
+                    {!showFeedback && isSelected && <div className="w-6 h-6 rounded-full border-[6px] border-duo-blue shrink-0"></div>}
+                    {!showFeedback && !isSelected && <div className="w-6 h-6 rounded-full border-2 border-gray-200 group-hover:border-duo-blue shrink-0"></div>}
                  </div>
                </button>
              )

@@ -8,12 +8,15 @@ import { AuthModule } from './auth/auth.module'
 import { LearningModule } from './learning/learning.module'
 import { StatsModule } from './stats/stats.module'
 import { UserModule } from './user/user.module'
+import { PetModule } from './pet/pet.module'
+import { WalletModule } from './wallet/wallet.module'
+import { DebugModule } from './debug/debug.module'
 import { HealthController } from './health.controller'
 
 const mongoUrl = process.env.MONGO_URL || 'mongodb://localhost:27017/linguacraft'
 
 @Module({
-  imports: [MongooseModule.forRoot(mongoUrl), AuthModule, LearningModule, UserModule, StatsModule],
+  imports: [MongooseModule.forRoot(mongoUrl), AuthModule, LearningModule, UserModule, StatsModule, PetModule, WalletModule, DebugModule],
   controllers: [HealthController]
 })
 export class AppModule {}

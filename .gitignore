@@ -32,3 +32,4 @@ backend/prisma/dev.db.bak
 
 # IDE/Tooling
 .trae/
+data/raw/

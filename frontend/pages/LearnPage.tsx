@@ -10,7 +10,7 @@ import { useApp } from '../contexts/AppContext';
 import { RefreshCw, LogIn, BookOpen } from 'lucide-react';
 
 export const LearnPage: React.FC = () => {
-  const { sessionQueue, currentIndex, handleQuestionSuccess, handleSkip, exitLearning, showSummary, sessionMastered, startNextSession, streak, streakAtSessionStart, isLoading, loadError, logout } = useApp();
+  const { sessionQueue, currentIndex, handleQuestionSuccess, handleSkip, exitLearning, showSummary, sessionProgressed, startNextSession, streak, streakAtSessionStart, isLoading, loadError, logout } = useApp();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,28 +18,28 @@ export const LearnPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex-grow flex flex-col h-[calc(100vh-64px)] animate-fade-in relative overflow-hidden">
+    <div className="flex-grow flex flex-col h-full animate-fade-in relative overflow-hidden">
       {sessionQueue.length > 0 && !showSummary ? (
         <LearningSession
-          question={sessionQueue[currentIndex]}
-          currentIndex={currentIndex}
-          totalCount={sessionQueue.length}
-          onSuccess={handleQuestionSuccess}
-          onSkip={handleSkip}
-          onExit={() => { exitLearning(); navigate('/'); }}
-          onReady={() => { }}
-        />
-      ) : showSummary ? (
-        <SessionSummary
-          items={sessionMastered.map(i => ({ word: i.word, userSentence: i.userSentence, masteredAt: i.masteredAt, partOfSpeech: i.partOfSpeech }))}
-          count={sessionMastered.length}
-          streak={streak}
-          streakDelta={Math.max(0, (streak || 0) - (streakAtSessionStart || 0))}
-          onBackHome={() => { exitLearning(); navigate('/'); }}
-        />
+            question={sessionQueue[currentIndex]}
+            currentIndex={currentIndex}
+            totalCount={sessionQueue.length}
+            onSuccess={handleQuestionSuccess}
+            onSkip={handleSkip}
+            onExit={() => { exitLearning(); navigate(-1); }}
+            onReady={() => { }}
+          />
+        ) : showSummary ? (
+          <SessionSummary
+            items={sessionProgressed.map(i => ({ word: i.word, stage: i.stage as 'new' | 'familiar' | 'mastered' }))}
+            count={sessionProgressed.length}
+            streak={streak}
+            streakDelta={Math.max(0, (streak || 0) - (streakAtSessionStart || 0))}
+            onBackHome={() => { exitLearning(); navigate(-1); }}
+          />
       ) : (
         <div className="flex-1 flex items-center justify-center p-6">
-          <div className="text-center glass-card max-w-sm w-full rounded-3xl p-8">
+          <div className="text-center bg-white border-2 border-gray-200 border-b-4 rounded-2xl max-w-sm w-full p-8">
             {isLoading ? (
               <div className="flex flex-col items-center">
                 <div className="relative mb-5">

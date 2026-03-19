@@ -7,6 +7,7 @@ import { MasteredItem, EducationLevel } from '../types';
 import { fetchMasteryList, generateStory } from '../services/geminiService';
 import { CheckCircle2, Quote, Sparkles, ArrowLeft, BookOpen, Layers } from 'lucide-react';
 import { StoryModal } from './StoryModal';
+import { Button } from './Button';
 
 interface ReviewListProps { items: MasteredItem[]; onBack: () => void }
 
@@ -80,20 +81,22 @@ export const ReviewList: React.FC<ReviewListProps> = ({ items, onBack }) => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">已掌握词汇</h2>
         <div className="flex items-center gap-2.5">
-          <button
+          <Button
+            variant="secondary"
             onClick={handleGenerateStory}
             disabled={displayed.length === 0}
-            className={`flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-brand-600 via-accent-500 to-brand-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30 hover:scale-[1.02] transition-all active:scale-95 ${displayed.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className="flex items-center gap-2"
           >
             <Sparkles size={16} />
             故事模式
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="outline"
             onClick={onBack}
-            className="flex items-center gap-2 px-4 py-2.5 text-gray-600 bg-white border border-gray-200 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-300 transition-colors text-sm"
+            className="flex items-center gap-2"
           >
             <ArrowLeft size={16} /> 返回
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -109,7 +112,7 @@ export const ReviewList: React.FC<ReviewListProps> = ({ items, onBack }) => {
       )}
 
       {displayed.length === 0 ? (
-        <div className="text-center py-20 glass-card rounded-3xl border-2 border-dashed border-gray-200">
+        <div className="text-center py-20 bg-white border-2 border-gray-200 border-b-4 rounded-xl">
           <div className="mb-5 inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-50 text-gray-400">
             <BookOpen size={28} />
           </div>
@@ -119,7 +122,7 @@ export const ReviewList: React.FC<ReviewListProps> = ({ items, onBack }) => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {displayed.map((item, index) => (
-            <div key={index} className="glass-card p-5 rounded-2xl hover:-translate-y-0.5 transition-all duration-300 group cursor-default h-full flex flex-col">
+            <div key={index} className="bg-white border-2 border-gray-200 border-b-4 rounded-xl p-4 mb-3 hover:-translate-y-0.5 transition-all duration-300 group cursor-default h-full flex flex-col">
               <div className="flex justify-between items-start mb-2.5">
                 <div>
                   <h3 className="text-xl font-bold text-gray-900">{item.word}</h3>

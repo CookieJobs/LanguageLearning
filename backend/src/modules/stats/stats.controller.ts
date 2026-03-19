@@ -11,6 +11,8 @@ export class StatsController {
   constructor(private stats: StatsService) {}
   @Get('me') @UseGuards(JwtGuard)
   async me(@Req() req: any) { return this.stats.getStats(req.user.id) }
+  @Get('calendar') @UseGuards(JwtGuard)
+  async calendar(@Req() req: any) { return this.stats.getCalendar(req.user.id) }
   @Post('checkin') @UseGuards(JwtGuard)
   async checkin(@Req() req: any, @Body() body: { date?: string }) {
     const date = body?.date ? new Date(body.date) : undefined

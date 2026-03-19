@@ -2,32 +2,49 @@
 // output: Logo
 // pos: 前端/组件层
 // 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
-import React from 'react'
-import { BookOpen } from 'lucide-react'
+import React from 'react';
+import { BookOpen } from 'lucide-react';
 
 interface LogoProps { size?: 'sm' | 'md' | 'lg'; withText?: boolean; className?: string }
 
 export const Logo: React.FC<LogoProps> = ({ size = 'md', withText = true, className }) => {
-  const iconSize = size === 'sm' ? 16 : size === 'md' ? 22 : 28
-  const textSize = size === 'sm' ? 'text-base' : size === 'md' ? 'text-lg' : 'text-2xl'
-  const boxClass = size === 'sm'
-    ? 'p-1.5 rounded-lg'
-    : size === 'md'
-      ? 'p-2.5 rounded-xl'
-      : 'p-3 rounded-2xl'
+  const sizes = {
+    sm: { icon: 18, box: 'w-8 h-8 rounded-xl', text: 'text-lg' },
+    md: { icon: 24, box: 'w-10 h-10 rounded-2xl', text: 'text-2xl' },
+    lg: { icon: 32, box: 'w-14 h-14 rounded-3xl', text: 'text-4xl' }
+  }[size];
 
   return (
-    <div className={`flex items-center gap-3 group ${className || ''}`}>
-      <div className={`bg-gradient-to-br from-brand-600 via-brand-500 to-accent-500 text-white ${boxClass} flex items-center justify-center shadow-lg shadow-brand-500/25 group-hover:shadow-brand-500/40 transition-all duration-300 group-hover:scale-105`}>
-        <BookOpen size={iconSize} strokeWidth={2.5} />
+    <div className={`flex items-center gap-2.5 group cursor-pointer select-none ${className || ''}`}>
+      <div className={`
+        relative flex items-center justify-center 
+        ${sizes.box}
+        bg-gradient-to-br from-brand-50 to-indigo-50
+        border border-brand-200/50
+        group-hover:from-brand-100 group-hover:to-indigo-100 group-hover:border-brand-200
+        group-hover:scale-110
+        transition-all duration-300 ease-out
+        shadow-sm
+      `}>
+        <BookOpen 
+          size={sizes.icon} 
+          strokeWidth={2.5} 
+          className="text-brand-600 fill-brand-500 relative z-10 group-hover:rotate-[-8deg] transition-transform duration-300" 
+        />
       </div>
+
       {withText && (
-        <span className={`${textSize} font-bold tracking-tight bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent`}>
+        <span className={`
+          font-black tracking-tight
+          text-gray-900 group-hover:text-brand-600
+          transition-colors duration-300
+          ${sizes.text}
+        `}>
           LinguaCraft
         </span>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Logo
+export default Logo;

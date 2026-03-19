@@ -140,6 +140,11 @@ export const getStats = async (): Promise<{ currentStreak: number; longestStreak
   return await res.json()
 }
 
+export const getCalendar = async (): Promise<string[]> => {
+  const res = await apiFetch(`${API_BASE}/api/stats/calendar`, { method: "GET" })
+  return await res.json()
+}
+
 export const checkin = async (date?: string): Promise<{ currentStreak: number; longestStreak: number; lastActivityDate?: string | null }> => {
   const res = await apiFetch(`${API_BASE}/api/stats/checkin`, {
     method: "POST",
@@ -171,8 +176,11 @@ export const generateStory = async (words: string[]): Promise<{ story: string; t
   return await res.json()
 }
 
-export const fetchTextbooks = async (): Promise<string[]> => {
-  const res = await apiFetch(`${base}/textbooks`, { method: "GET" })
+export const fetchTextbooks = async (level?: string): Promise<string[]> => {
+  const params: string[] = []
+  if (level) params.push(`level=${encodeURIComponent(level)}`)
+  const url = params.length ? `${base}/textbooks?${params.join('&')}` : `${base}/textbooks`
+  const res = await apiFetch(url, { method: "GET" })
   const data = await res.json()
   return data.textbooks || []
 }
@@ -183,5 +191,24 @@ export const fetchProgress = async (level?: string, textbook?: string): Promise<
   if (textbook) params.push(`textbook=${encodeURIComponent(textbook)}`)
   const url = params.length ? `${base}/progress?${params.join('&')}` : `${base}/progress`
   const res = await apiFetch(url, { method: "GET" })
-  return await res.json()
+  const data = await res.json()
+  
+  // Provide fallbacks to support the multi-dimensional progress structure
+  return {
+    ...data,
+    mastered: data.mastered ?? data.masteredCount ?? 0,
+    learning: data.learning ?? 0,
+    new: data.new ?? (data.totalCount - (data.masteredCount ?? 0)),
+    toReview: data.toReview ?? 0,
+    struggling: data.struggling ?? 0,
+    list: (data.list || []).map((item: any) => ({
+      ...item,
+      learning: item.learning ?? false,
+      toReview: item.toReview ?? false,
+      struggling: item.struggling ?? false,
+      stage: item.stage ?? 0,
+      wrongCount: item.wrongCount ?? 0,
+      nextReviewAt: item.nextReviewAt ?? null
+    }))
+  }
 }

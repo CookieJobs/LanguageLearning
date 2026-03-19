@@ -56,6 +56,16 @@ export class VocabService {
     // Inject enhanced audio URL if missing
     return scored.slice(0, limit).map(s => {
       const w = s.w
+
+      // Apply contextual definition if textbook matches
+      if (textbook && w.contextualDefinitions?.length) {
+        const contextDef = w.contextualDefinitions.find(cd => cd.textbook === textbook)
+        if (contextDef) {
+          w.definitionZh = contextDef.definitionZh
+          w.exampleEn = contextDef.exampleEn
+        }
+      }
+
       if (!w.audioUrl) {
         // Type 2 = US English, Type 1 = UK
         w.audioUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(w.headword)}&type=2`

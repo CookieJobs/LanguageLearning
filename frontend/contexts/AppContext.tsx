@@ -12,13 +12,13 @@ type AppContextType = {
   sessionQueue: Question[];
   currentIndex: number;
   masteredItems: MasteredItem[];
-  sessionMastered: MasteredItem[];
+  sessionProgressed: { word: string, stage: 'new' | 'familiar' | 'mastered' }[];
   isLoading: boolean;
   streak: number;
   streakAtSessionStart: number;
   sessionProgress: number;
   loadError: { code: string; message: string } | null;
-  handleLevelSelect: (selectedLevel: EducationLevel) => Promise<void>;
+  handleLevelSelect: (selectedLevel: EducationLevel, selectedTextbook?: string | null) => Promise<void>;
   handleQuestionSuccess: (question: Question, answer: any) => Promise<void>;
   handleSkip: () => void;
   moveToNext: () => void;
@@ -45,7 +45,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const saved = localStorage.getItem('linguaCraft_mastered');
     return saved ? JSON.parse(saved) : [];
   });
-  const [sessionMastered, setSessionMastered] = useState<MasteredItem[]>([]);
+  const [sessionProgressed, setSessionProgressed] = useState<{ word: string, stage: 'new' | 'familiar' | 'mastered' }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [token, setTokenState] = useState<string | null>(() => localStorage.getItem('linguaCraft_token'));
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -91,6 +91,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setSessionQueue([]);
       setCurrentIndex(0);
       setSessionProgress(0);
+      setSessionProgressed([]);
       setIsSessionExpired(false);
       setLoadError(null);
     };
@@ -118,16 +119,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }
 
-  const startNextSession = async (overrideLevel?: EducationLevel) => {
+  const startNextSession = async (overrideLevel?: EducationLevel, overrideTextbook?: string | null) => {
     setIsLoading(true)
     setLoadError(null)
     const currentLevel = overrideLevel || level || EducationLevel.PRIMARY;
     try {
-      const questions = await fetchSessionQuestions(normalizeLevel(currentLevel), selectedTextbook || undefined)
+      const questions = await fetchSessionQuestions(normalizeLevel(currentLevel), overrideTextbook !== undefined ? (overrideTextbook || undefined) : (selectedTextbook || undefined))
       
       setSessionQueue(questions || [])
       setCurrentIndex(0)
-      setSessionMastered([])
+      setSessionProgressed([])
       setSessionProgress(0)
       setShowSummary(false)
       setStreakAtSessionStart(streak || 0)
@@ -137,18 +138,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsLoading(false)
   }
 
-  const handleLevelSelect = async (selectedLevel: EducationLevel) => {
+  const handleLevelSelect = async (selectedLevel: EducationLevel, newTextbook?: string | null) => {
     setIsLoading(true);
     setLoadError(null);
     setLevel(selectedLevel);
+    if (newTextbook !== undefined) {
+      setSelectedTextbook(newTextbook);
+    }
     // Persist to backend
     if (token) {
-      updateMe({ educationLevel: selectedLevel }).catch(() => { });
+      updateMe({ 
+        educationLevel: selectedLevel,
+        ...(newTextbook !== undefined ? { textbook: newTextbook || '' } : {})
+      }).catch(() => { });
     }
-    await startNextSession(selectedLevel);
+    await startNextSession(selectedLevel, newTextbook);
   };
 
   const handleQuestionSuccess = async (question: Question, answer: any) => {
+    // Update sessionProgressed
+    const stageMap: Record<string, 'new' | 'familiar' | 'mastered'> = {
+      'choice': 'new',
+      'quiz': 'familiar',
+      'sentence': 'mastered'
+    };
+    const stage = stageMap[question.type] || 'new';
+    setSessionProgressed(prev => {
+      const exists = prev.find(p => p.word === question.word.word);
+      if (exists) {
+        // If it exists, update it if the new stage is "higher"
+        const stagePriority = { 'new': 1, 'familiar': 2, 'mastered': 3 };
+        if (stagePriority[stage] > stagePriority[exists.stage]) {
+          return prev.map(p => p.word === question.word.word ? { ...p, stage } : p);
+        }
+        return prev;
+      }
+      return [...prev, { word: question.word.word, stage }];
+    });
+
     if (question.type === 'sentence') {
         const newItem: MasteredItem = {
           ...question.word,
@@ -157,7 +184,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           sourceLevel: level || EducationLevel.PRIMARY,
         };
         setMasteredItems(prev => [newItem, ...prev]);
-        setSessionMastered(prev => [newItem, ...prev]);
     }
     setSessionProgress(p => p + 1);
     
@@ -204,6 +230,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSessionQueue([]);
     setCurrentIndex(0);
     setSessionProgress(0);
+    setSessionProgressed([]);
     setLoadError(null);
   };
 
@@ -211,6 +238,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSessionQueue([]);
     setCurrentIndex(0);
     setSessionProgress(0);
+    setSessionProgressed([]);
     setLoadError(null);
   };
 
@@ -254,7 +282,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     sessionQueue,
     currentIndex,
     masteredItems,
-    sessionMastered,
+    sessionProgressed,
     isLoading,
     streak,
     streakAtSessionStart,
@@ -278,7 +306,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateMe({ textbook: t || '' }).catch(() => { });
       }
     }
-  }), [token, userEmail, level, meLoaded, sessionQueue, currentIndex, masteredItems, sessionMastered, isLoading, streak, streakAtSessionStart, sessionProgress, showSummary, isSessionExpired, loadError, selectedTextbook]);
+  }), [token, userEmail, level, meLoaded, sessionQueue, currentIndex, masteredItems, sessionProgressed, isLoading, streak, streakAtSessionStart, sessionProgress, showSummary, isSessionExpired, loadError, selectedTextbook]);
 
   return (<AppContext.Provider value={value}>{children}</AppContext.Provider>);
 };

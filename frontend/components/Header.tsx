@@ -1,8 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
+import { Button } from './Button';
 import { Logo } from './Logo';
-import { LogOut, User, ChevronDown } from 'lucide-react';
+import CoinBalance from './CoinBalance';
+import { StreakStatus } from './StreakStatus';
+import { LogOut, User, ChevronDown, BookOpen } from 'lucide-react';
 
 export const Header: React.FC = () => {
     const { token, userEmail, logout, level } = useApp();
@@ -22,11 +25,11 @@ export const Header: React.FC = () => {
     const levelLabel = getLevelLabel(level)
 
     return (
-        <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-gray-100 transition-all duration-300">
+        <header className="sticky top-0 z-50 w-full bg-white border-b-2 border-gray-200 transition-all duration-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
                 {/* Left: Logo */}
                 <div
-                    className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity group"
+                    className="flex items-center gap-2 cursor-pointer transition-opacity"
                     onClick={() => navigate('/')}
                     title="返回首页"
                 >
@@ -37,46 +40,53 @@ export const Header: React.FC = () => {
                 <div className="flex items-center gap-4">
                     {token ? (
                         <>
+                            <div className="hidden sm:block">
+                                <StreakStatus />
+                            </div>
+                            <div className="hidden sm:block">
+                                <CoinBalance />
+                            </div>
+
                             {/* Level Badge Switcher */}
                             {levelLabel && (
                                 <button
                                     onClick={() => navigate('/level-select')}
-                                    className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-gray-50 hover:bg-brand-50 text-gray-600 hover:text-brand-600 rounded-full border border-gray-200 hover:border-brand-200 transition-all text-xs font-semibold group"
+                                    className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-gradient-to-br from-blue-50 to-sky-50 hover:from-blue-100 hover:to-sky-100 text-blue-700 rounded-xl border border-blue-200/50 hover:border-blue-200 transition-all group shadow-sm"
                                     title="切换学段/教材"
                                 >
-                                    <span className="w-1.5 h-1.5 rounded-full bg-brand-500 group-hover:scale-125 transition-transform"></span>
-                                    {levelLabel}
-                                    <ChevronDown size={12} className="text-gray-400 group-hover:text-brand-400" />
+                                    <BookOpen size={18} className="fill-blue-500 text-blue-600 group-hover:scale-110 transition-transform" />
+                                    <span className="text-base font-bold text-blue-700">{levelLabel}</span>
+                                    <ChevronDown size={14} className="text-blue-400 group-hover:text-blue-600 transition-colors ml-0.5" strokeWidth={2.5} />
                                 </button>
                             )}
 
-                            {/* User Profile */}
-                            <div className="flex items-center gap-3 pl-3 sm:border-l sm:border-gray-200 h-6">
+                            {/* User Profile & Logout */}
+                            <div className="flex items-center gap-3">
                                 {userEmail && (
-                                    <div className="hidden sm:flex items-center gap-2 text-sm font-medium text-gray-700">
-                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-100 to-indigo-100 flex items-center justify-center text-brand-600 border border-brand-200/50 shadow-sm">
-                                            <User size={14} strokeWidth={2.5} />
+                                    <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-gradient-to-br from-gray-50 to-slate-50 border border-gray-200/50 rounded-xl shadow-sm cursor-default">
+                                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-brand-100 to-indigo-100 flex items-center justify-center text-brand-600 border border-brand-200/50 shadow-sm">
+                                            <User size={12} strokeWidth={2.5} />
                                         </div>
-                                        <span className="hidden md:inline">{userEmail.split('@')[0]}</span>
+                                        <span className="hidden md:inline text-sm font-bold text-gray-600">{userEmail.split('@')[0]}</span>
                                     </div>
                                 )}
 
                                 <button
                                     onClick={async () => { await logout(); navigate('/login'); }}
-                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
+                                    className="flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-red-50 to-rose-50 hover:from-red-100 hover:to-rose-100 text-red-500 hover:text-red-600 border border-red-200/50 hover:border-red-200 transition-all shadow-sm group"
                                     title="退出登录"
                                 >
-                                    <LogOut size={18} />
+                                    <LogOut size={16} className="group-hover:scale-110 transition-transform" />
                                 </button>
                             </div>
                         </>
                     ) : (
-                        <button
+                        <Button
+                            variant="primary"
                             onClick={() => navigate('/login')}
-                            className="text-sm font-semibold bg-brand-600 text-white px-5 py-2 rounded-full hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-500/25 transition-all active:scale-95"
                         >
                             登录
-                        </button>
+                        </Button>
                     )}
                 </div>
             </div>

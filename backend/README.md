@@ -10,6 +10,22 @@
 - package-lock.json — 文件 — 依赖锁定
 - package.json — 文件 — 依赖与脚本
 - prisma/ — 目录 — 旧版 Prisma 资产（已弃用）
-- scripts/ — 目录 — 数据脚本（词库导入/校验）
+- scripts/ — 目录 — 数据脚本（词库导入/校验/AI补全）
 - src/ — 目录 — 业务代码与模块
 - tsconfig.json — 文件 — TypeScript 配置
+
+## Scripts
+
+### Import Elementary Vocabulary
+Use this script to import elementary vocabulary from `data/processed/elementary_vocabulary.json`.
+It enriches missing examples using DeepSeek API.
+
+```bash
+# Ensure .env has DEEPSEEK_API_KEY
+npm run ts-node scripts/import-elementary-vocab.ts
+```
+
+### Run Import Tests
+```bash
+npm run ts-node scripts/import-vocab.spec.ts
+```

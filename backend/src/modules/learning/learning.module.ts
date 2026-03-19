@@ -20,6 +20,8 @@ import { UserSchema } from '../user/user.schema'
 import { StatsModule } from '../stats/stats.module'
 import { VocabSeedService } from './vocab-seed.service'
 import { JwtGuard } from '../../common/jwt.guard'
+import { PetModule } from '../pet/pet.module'
+import { WalletModule } from '../wallet/wallet.module'
 
 @Module({
   imports: [
@@ -29,7 +31,9 @@ import { JwtGuard } from '../../common/jwt.guard'
       { name: 'WordMastery', schema: WordMasterySchema },
       { name: 'UserWordProgress', schema: UserWordProgressSchema }
     ]),
-    StatsModule
+    StatsModule,
+    PetModule,
+    WalletModule
   ],
   controllers: [LearningController, StoryController],
   providers: [

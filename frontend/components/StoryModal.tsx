@@ -19,7 +19,7 @@ export const StoryModal: React.FC<StoryModalProps> = ({ story, translation, isLo
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-fade-in">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-scale-in flex flex-col max-h-[85vh]">
+            <div className="bg-white rounded-2xl border-2 border-gray-200 border-b-4 shadow-2xl w-full max-w-lg overflow-hidden animate-scale-in flex flex-col max-h-[85vh]">
 
                 {/* Header */}
                 <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-brand-50 via-accent-50/50 to-brand-50">

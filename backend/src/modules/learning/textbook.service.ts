@@ -17,11 +17,31 @@ export class TextbookService implements OnModuleInit {
         await this.importTextbooks();
     }
 
-    async listTextbooks(): Promise<string[]> {
-        if (!fs.existsSync(this.bookDir)) return [];
-        return fs.readdirSync(this.bookDir)
-            .filter(f => f.endsWith('.xlsx'))
-            .map(f => path.parse(f).name);
+    async listTextbooks(level?: string): Promise<string[]> {
+        let textbooks: string[] = [];
+        
+        if (!level || level === 'Middle') {
+            if (fs.existsSync(this.bookDir)) {
+                const middleBooks = fs.readdirSync(this.bookDir)
+                    .filter(f => f.endsWith('.xlsx'))
+                    .map(f => path.parse(f).name);
+                textbooks = textbooks.concat(middleBooks);
+            }
+        }
+
+        if (!level || level === 'Primary') {
+            const primaryBooksPath = path.join(process.cwd(), '../data/processed/primary_textbooks.json');
+            if (fs.existsSync(primaryBooksPath)) {
+                try {
+                    const primaryBooks = JSON.parse(fs.readFileSync(primaryBooksPath, 'utf-8'));
+                    textbooks = textbooks.concat(primaryBooks);
+                } catch (e) {
+                    this.logger.error(`Failed to read primary textbooks: ${e.message}`);
+                }
+            }
+        }
+        
+        return textbooks;
     }
 
     private async importTextbooks() {

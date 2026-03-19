@@ -112,9 +112,16 @@ export class LearningController {
   }
 
   @Get('textbooks')
-  async listTextbooks() {
+  async listTextbooks(@Query('level') level?: string) {
+    const normalize = (s: string): string => {
+      const map: Record<string, any> = {
+        'Primary School (小学)': 'Primary', 'Junior High School (初中)': 'Middle', 'Senior High School (高中)': 'High', 'University (大学/四六级)': 'University', 'Professional/Study Abroad (雅思/托福/职场)': 'Professional'
+      }
+      return map[s] || s
+    }
+    const levelCode = level ? normalize(level) : undefined;
     return {
-      textbooks: await this.textbookService.listTextbooks()
+      textbooks: await this.textbookService.listTextbooks(levelCode)
     }
   }
 

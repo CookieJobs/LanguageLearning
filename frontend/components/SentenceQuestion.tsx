@@ -34,8 +34,8 @@ export const SentenceQuestion: React.FC<SentenceQuestionProps> = ({
     <div className="max-w-xl mx-auto w-full space-y-5 animate-fade-in">
        {/* Sentence Prompt */}
        <div>
-          <label htmlFor="sentence-input" className="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider flex items-center gap-1.5">
-             <Edit3 size={14} className="text-brand-500" />
+          <label htmlFor="sentence-input" className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider flex items-center gap-1.5">
+             <Edit3 size={14} className="text-duo-blue" />
              {question.questionText || "造句练习"}
           </label>
 
@@ -44,12 +44,12 @@ export const SentenceQuestion: React.FC<SentenceQuestionProps> = ({
                 id="sentence-input"
                 ref={inputRef}
                 className={`
-               w-full p-5 text-lg md:text-xl font-medium leading-relaxed rounded-2xl border-2 transition-all resize-none min-h-[140px]
+               w-full p-5 text-lg md:text-xl font-medium leading-relaxed rounded-2xl border-2 transition-all resize-none min-h-[140px] outline-none
                ${feedback?.isCorrect
-                      ? 'border-emerald-300 bg-emerald-50/50 text-emerald-900 focus:border-emerald-400 ring-2 ring-emerald-500/10'
+                      ? 'border-duo-green bg-green-50 text-green-900'
                       : feedback?.isCorrect === false
-                         ? 'border-red-300 bg-red-50/50 text-red-900 focus:border-red-400 ring-2 ring-red-500/10'
-                         : 'border-gray-200 bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-500/10 placeholder-gray-300 shadow-sm'}
+                         ? 'border-duo-red bg-red-50 text-red-900'
+                         : 'border-gray-200 bg-gray-50 focus:bg-white focus:border-duo-blue placeholder-gray-400'}
              `}
                 placeholder={`请使用 "${word.word}" 造句...`}
                 value={sentence}
@@ -64,7 +64,7 @@ export const SentenceQuestion: React.FC<SentenceQuestionProps> = ({
              />
              {isChecking && (
                 <div className="absolute top-4 right-4">
-                   <div className="w-5 h-5 border-2 border-brand-200 border-t-brand-500 rounded-full animate-spin"></div>
+                   <div className="w-5 h-5 border-2 border-blue-200 border-t-duo-blue rounded-full animate-spin"></div>
                 </div>
              )}
           </div>
@@ -72,7 +72,7 @@ export const SentenceQuestion: React.FC<SentenceQuestionProps> = ({
           <div className="flex justify-end mt-2">
              <button
                 onClick={onToggleHint}
-                className="text-xs font-semibold text-gray-400 hover:text-brand-600 flex items-center px-2.5 py-1.5 rounded-lg hover:bg-brand-50 transition-colors gap-1"
+                className="text-xs font-bold text-gray-400 hover:text-duo-blue flex items-center px-2.5 py-1.5 rounded-lg hover:bg-blue-50 transition-colors gap-1"
              >
                 <Lightbulb size={13} />
                 {showHint ? '隐藏提示' : '需要提示?'}

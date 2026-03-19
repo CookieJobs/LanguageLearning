@@ -9,13 +9,17 @@ import { AuthService } from './auth.service'
 import { RefreshTokenSchema } from './refresh-token.schema'
 import { UserSchema } from '../user/user.schema'
 import { JwtGuard } from '../../common/jwt.guard'
+import { PetModule } from '../pet/pet.module'
+import { WalletModule } from '../wallet/wallet.module'
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: 'User', schema: UserSchema },
       { name: 'RefreshToken', schema: RefreshTokenSchema }
-    ])
+    ]),
+    PetModule,
+    WalletModule
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtGuard]
