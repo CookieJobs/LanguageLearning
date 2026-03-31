@@ -186,10 +186,6 @@ export const LearningSession: React.FC<LearningSessionProps> = ({
             <div className="w-full py-8 md:py-10 bg-duo-blue relative flex flex-col items-center justify-center px-6 md:px-8 text-white shadow-none z-10 border-b-4 border-[#1899d6] shrink-0">
                
                <div className="relative z-10 text-center animate-fade-in-up">
-                  <div className="inline-flex items-center justify-center px-3 py-1 rounded-xl bg-black/20 backdrop-blur-none border-none mb-4 text-xs font-bold tracking-wider uppercase text-white/90">
-                     {word.partOfSpeech}
-                  </div>
-                  
                   <h1 className={`font-bold mb-4 leading-relaxed drop-shadow-sm break-words max-w-full ${
                      (question.type === 'sentence' ? word.word : question.questionText).length > 60
                         ? 'text-lg md:text-xl lg:text-2xl'

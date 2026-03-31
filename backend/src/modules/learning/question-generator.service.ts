@@ -22,19 +22,40 @@ export class QuestionGeneratorService {
     private vocabService: VocabService
   ) {}
 
+  /** 将 levels 值映射到 definitions 的 key */
+  private levelToKey(level: string): string {
+    const map: Record<string, string> = {
+      'Primary': 'primary',
+      'Middle': 'junior',
+      'High': 'senior',
+      'University': 'junior',
+      'Professional': 'senior',
+    }
+    return map[level] || 'junior'
+  }
+
+  /** 获取单词在指定级别的分级释义，若无则降级到 definitionZh */
+  private getGradeDefinition(word: VocabWordDocument, level: string): string {
+    const key = this.levelToKey(level)
+    const gradeDef = word.definitions?.[key]
+    return gradeDef && gradeDef.trim() ? gradeDef : (word.definitionZh || '')
+  }
+
   async generateChoiceQuestion(word: VocabWordDocument, mode: 'en-zh' | 'zh-en'): Promise<QuestionPayload> {
-    const distractors = await this.vocabService.getRandomDistractors(3, String(word._id), word.levels?.[0])
-    
+    const level = word.levels?.[0] || 'junior'
+    const distractors = await this.vocabService.getRandomDistractors(3, String(word._id), level)
+
     let questionText: string
     let correctText: string
     let distractorTextFn: (w: any) => string
 
     if (mode === 'en-zh') {
       questionText = word.headword
-      correctText = word.definitionZh
-      distractorTextFn = (w) => w.definitionZh
+      // 使用分级释义而非原始复杂释义
+      correctText = this.getGradeDefinition(word, level)
+      distractorTextFn = (w) => this.getGradeDefinition(w, level)
     } else {
-      questionText = word.definitionZh
+      questionText = this.getGradeDefinition(word, level)
       correctText = word.headword
       distractorTextFn = (w) => w.headword
     }

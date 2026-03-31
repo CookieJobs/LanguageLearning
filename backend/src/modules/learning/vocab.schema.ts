@@ -4,6 +4,13 @@
 // 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import { HydratedDocument, Schema } from 'mongoose'
 
+export interface GradeDefinitions {
+  primary?: string
+  junior?: string
+  senior?: string
+  [key: string]: string | undefined
+}
+
 export interface VocabWord {
   headword: string
   lemma: string
@@ -19,6 +26,7 @@ export interface VocabWord {
   topics: string[]
   textbooks?: string[]
   source?: string
+  definitions?: GradeDefinitions
   contextualDefinitions?: {
     textbook: string
     definitionZh: string
@@ -43,6 +51,11 @@ export const VocabWordSchema = new Schema<VocabWord>({
   topics: { type: [String], default: [] },
   textbooks: { type: [String], default: [] },
   source: { type: String },
+  definitions: {
+    primary: { type: String },
+    junior: { type: String },
+    senior: { type: String }
+  },
   contextualDefinitions: [
     {
       textbook: { type: String, required: true },
