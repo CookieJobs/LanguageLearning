@@ -68,9 +68,9 @@ export const ReviewList: React.FC<ReviewListProps> = ({ items, onBack }) => {
       [EducationLevel.PRIMARY]: '小学',
       [EducationLevel.MIDDLE]: '初中',
       [EducationLevel.HIGH]: '高中',
-      [EducationLevel.UNIVERSITY]: '大学',
-      [EducationLevel.PROFESSIONAL]: '职场/留学',
-      'Primary': '小学', 'Middle': '初中', 'High': '高中', 'University': '大学', 'Professional': '职场'
+      [EducationLevel.UNIVERSITY]: '四级',
+      [EducationLevel.PROFESSIONAL]: '六级',
+      'Primary': '小学', 'Middle': '初中', 'High': '高中', 'University': '四级', 'Professional': '六级'
     };
     return map[level] || level;
   };

@@ -84,7 +84,7 @@ export const HomePage: React.FC = () => {
 
                 <Button
                   disabled={isLoading}
-                  onClick={async () => { navigate('/learn'); if (!isLoading) await startNextSession(); }}
+                  onClick={async () => { await startNextSession(currentLevel); navigate('/learn'); }}
                   variant="duo-primary"
                   className="px-10 py-5 text-xl h-auto"
                 >
@@ -156,11 +156,16 @@ export const HomePage: React.FC = () => {
 
 function levelLabelShort(l: any): string {
   switch (l) {
+    case 'Primary School (小学)': return '小学'
+    case 'Junior High School (初中)': return '初中'
+    case 'Senior High School (高中)': return '高中'
+    case 'CET4 (四级)': return '四级'
+    case 'CET6 (六级)': return '六级'
     case EducationLevel.PRIMARY: return '小学'
     case EducationLevel.MIDDLE: return '初中'
     case EducationLevel.HIGH: return '高中'
-    case EducationLevel.UNIVERSITY: return '大学'
-    case EducationLevel.PROFESSIONAL: return '职场/留学'
+    case EducationLevel.UNIVERSITY: return '四级'
+    case EducationLevel.PROFESSIONAL: return '六级'
     default: return '外语'
   }
 }

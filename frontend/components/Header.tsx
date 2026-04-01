@@ -16,8 +16,10 @@ export const Header: React.FC = () => {
             case 'Primary School (小学)': return '小学'
             case 'Junior High School (初中)': return '初中'
             case 'Senior High School (高中)': return '高中'
-            case 'University (大学/四六级)': return '大学'
-            case 'Professional/Study Abroad (雅思/托福/职场)': return '职场'
+            case 'CET4 (四级)': return '四级'
+            case 'CET6 (六级)': return '六级'
+            case 'University (大学/四六级)': return '四级'
+            case 'Professional/Study Abroad (雅思/托福/职场)': return '六级'
             default: return null
         }
     }

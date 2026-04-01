@@ -113,8 +113,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       case EducationLevel.PRIMARY: return 'Primary'
       case EducationLevel.MIDDLE: return 'Middle'
       case EducationLevel.HIGH: return 'High'
-      case EducationLevel.UNIVERSITY: return 'University'
-      case EducationLevel.PROFESSIONAL: return 'Professional'
+      case EducationLevel.UNIVERSITY: return 'CET-4 (四级)'
+      case EducationLevel.PROFESSIONAL: return 'CET-6 (六级)'
       default: return String(level)
     }
   }
