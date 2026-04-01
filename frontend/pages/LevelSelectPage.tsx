@@ -8,10 +8,8 @@ import { ArrowLeft, Check, Book } from 'lucide-react';
 export const LevelSelectPage: React.FC = () => {
     const { isLoading, level: currentLevel, handleLevelSelect, selectedTextbook: currentTextbook } = useApp();
     const navigate = useNavigate();
-    const [primaryTextbooks, setPrimaryTextbooks] = useState<string[]>([]);
     const [middleTextbooks, setMiddleTextbooks] = useState<string[]>([]);
-    const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
-    
+
     // Local state for immediate feedback without triggering global loading
     const [tempLevel, setTempLevel] = useState<EducationLevel | null>(currentLevel);
     const [tempTextbook, setTempTextbook] = useState<string | null>(currentTextbook);
@@ -25,29 +23,9 @@ export const LevelSelectPage: React.FC = () => {
     }, [currentTextbook]);
 
     useEffect(() => {
-        fetchTextbooks('Primary').then(setPrimaryTextbooks).catch(() => { });
         fetchTextbooks('Middle').then(setMiddleTextbooks).catch(() => { });
     }, []);
 
-    const getFilteredPrimaryBooks = () => {
-        if (!selectedGrade) return [];
-        const gradeChar = ['一', '二', '三', '四', '五', '六'][selectedGrade - 1];
-        
-        return primaryTextbooks.filter(tb => {
-            // Regular expression to match grade patterns like "一年级", "二年级", etc.
-            // We want to find the LAST occurrence of a grade in the string, as that usually indicates the target grade.
-            // Example: "人教版一年级起点二年级上" -> matches "一年级", "二年级". The last one is "二年级", so this book belongs to Grade 2.
-            const gradeMatches = tb.match(/[一二三四五六]年级/g);
-            
-            if (!gradeMatches || gradeMatches.length === 0) return false;
-            
-            // Get the last matched grade
-            const targetGrade = gradeMatches[gradeMatches.length - 1];
-            
-            // Check if it matches our selected grade
-            return targetGrade === `${gradeChar}年级`;
-        });
-    };
 
     const levels = [
         { id: EducationLevel.PRIMARY, label: '小学', icon: '🌱', desc: '基础词汇与日常对话' },
@@ -121,52 +99,6 @@ export const LevelSelectPage: React.FC = () => {
                                     </div>
                                 )}
                             </button>
-
-                            {/* Textbook Selection for Primary School */}
-                            {l.id === EducationLevel.PRIMARY && tempLevel === EducationLevel.PRIMARY && (
-                                <div className="mt-2 ml-4 pl-4 border-l-2 border-brand-200 animate-slide-down">
-                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-                                        <Book size={12} /> 选择年级
-                                    </p>
-                                    <div className="grid grid-cols-3 gap-2 mb-4">
-                                        {[1, 2, 3, 4, 5, 6].map(g => (
-                                            <button
-                                                key={g}
-                                                onClick={(e) => { e.stopPropagation(); setSelectedGrade(g); setTempTextbook(null); }}
-                                                className={`px-3 py-2 text-sm rounded-lg border text-center transition-all ${selectedGrade === g ? 'bg-brand-500 text-white border-brand-500 shadow-sm' : 'bg-white text-gray-600 border-gray-200 hover:border-brand-300'}`}
-                                            >
-                                                {['一', '二', '三', '四', '五', '六'][g - 1]}年级
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    {selectedGrade && (
-                                        <>
-                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-                                                <Book size={12} /> 选择教材
-                                            </p>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); setTempTextbook(null); }}
-                                                    className={`px-3 py-2 text-sm rounded-lg border text-left transition-all ${!tempTextbook ? 'bg-brand-500 text-white border-brand-500 shadow-sm' : 'bg-white text-gray-600 border-gray-200 hover:border-brand-300'}`}
-                                                >
-                                                    默认 (综合词汇)
-                                                </button>
-                                                {getFilteredPrimaryBooks().map(tb => (
-                                                    <button
-                                                        key={tb}
-                                                        onClick={(e) => { e.stopPropagation(); setTempTextbook(tb); }}
-                                                        className={`px-3 py-2 text-sm rounded-lg border text-left truncate transition-all ${tempTextbook === tb ? 'bg-brand-500 text-white border-brand-500 shadow-sm' : 'bg-white text-gray-600 border-gray-200 hover:border-brand-300'}`}
-                                                        title={tb}
-                                                    >
-                                                        {tb}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
-                            )}
 
                             {/* Textbook Selection for Middle School */}
                             {l.id === EducationLevel.MIDDLE && tempLevel === EducationLevel.MIDDLE && middleTextbooks.length > 0 && (
