@@ -26,12 +26,12 @@ export class QuestionGeneratorService {
   private levelToKey(level: string): string {
     const map: Record<string, string> = {
       'Primary': 'primary',
-      'Middle': 'junior',
-      'High': 'senior',
-      'University': 'junior',
-      'Professional': 'senior',
+      'Middle': 'middle',
+      'High': 'high',
+      'CET4': 'cet4',
+      'CET6': 'cet6',
     }
-    return map[level] || 'junior'
+    return map[level] || 'middle'
   }
 
   /** 获取单词在指定级别的分级释义，若无则降级到 definitionZh */

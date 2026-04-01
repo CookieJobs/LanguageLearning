@@ -7,7 +7,7 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
 import { VocabWordDocument } from './vocab.schema'
 
-type Level = 'Primary' | 'Middle' | 'High' | 'University' | 'Professional'
+type Level = 'Primary' | 'Middle' | 'High' | 'CET4' | 'CET6'
 
 function seededRandom(seed: string) { let h = 2166136261 >>> 0; for (let i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619) } return () => { h += 0x6D2B79F5; let t = Math.imul(h ^ (h >>> 15), 1 | h); t ^= t + Math.imul(t ^ (t >>> 7), 61 | t); return ((t ^ (t >>> 14)) >>> 0) / 4294967296 } }
 
@@ -15,8 +15,8 @@ const WEIGHTS: Record<Level, Record<'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2', num
   Primary: { A1: 0.7, A2: 0.3, B1: 0, B2: 0, C1: 0, C2: 0 },
   Middle: { A1: 0.1, A2: 0.5, B1: 0.4, B2: 0, C1: 0, C2: 0 },
   High: { A1: 0, A2: 0.1, B1: 0.6, B2: 0.3, C1: 0, C2: 0 },
-  University: { A1: 0, A2: 0, B1: 0.2, B2: 0.5, C1: 0.3, C2: 0 },
-  Professional: { A1: 0, A2: 0, B1: 0, B2: 0.2, C1: 0.6, C2: 0.2 }
+  CET4: { A1: 0, A2: 0, B1: 0.2, B2: 0.5, C1: 0.3, C2: 0 },
+  CET6: { A1: 0, A2: 0, B1: 0, B2: 0.2, C1: 0.6, C2: 0.2 }
 }
 
 @Injectable()

@@ -6,8 +6,12 @@ import { HydratedDocument, Schema } from 'mongoose'
 
 export interface GradeDefinitions {
   primary?: string
-  junior?: string
-  senior?: string
+  middle?: string
+  high?: string
+  university?: string
+  professional?: string
+  cet4?: string
+  cet6?: string
   [key: string]: string | undefined
 }
 

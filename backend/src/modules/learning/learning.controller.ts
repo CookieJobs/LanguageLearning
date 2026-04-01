@@ -79,7 +79,7 @@ export class LearningController {
        
        const normalize = (s: string) => {
           const map: Record<string, any> = {
-            'Primary School (小学)': 'Primary', 'Junior High School (初中)': 'Middle', 'Senior High School (高中)': 'High', 'University (大学/四六级)': 'University', 'Professional/Study Abroad (雅思/托福/职场)': 'Professional'
+            'Primary School (小学)': 'Primary', 'Junior High School (初中)': 'Middle', 'Senior High School (高中)': 'High', 'CET-4 (四级)': 'CET4', 'CET-6 (六级)': 'CET6'
           }
           return map[s] || s
        }
@@ -115,7 +115,7 @@ export class LearningController {
   async listTextbooks(@Query('level') level?: string) {
     const normalize = (s: string): string => {
       const map: Record<string, any> = {
-        'Primary School (小学)': 'Primary', 'Junior High School (初中)': 'Middle', 'Senior High School (高中)': 'High', 'University (大学/四六级)': 'University', 'Professional/Study Abroad (雅思/托福/职场)': 'Professional'
+        'Primary School (小学)': 'Primary', 'Junior High School (初中)': 'Middle', 'Senior High School (高中)': 'High', 'CET-4 (四级)': 'CET4', 'CET-6 (六级)': 'CET6'
       }
       return map[s] || s
     }
@@ -129,7 +129,7 @@ export class LearningController {
   async getProgress(@Req() req: any, @Query('level') level?: string, @Query('textbook') textbook?: string) {
     const normalize = (s: string): string => {
       const map: Record<string, any> = {
-        'Primary School (小学)': 'Primary', 'Junior High School (初中)': 'Middle', 'Senior High School (高中)': 'High', 'University (大学/四六级)': 'University', 'Professional/Study Abroad (雅思/托福/职场)': 'Professional'
+        'Primary School (小学)': 'Primary', 'Junior High School (初中)': 'Middle', 'Senior High School (高中)': 'High', 'CET-4 (四级)': 'CET4', 'CET-6 (六级)': 'CET6'
       }
       return map[s] || s
     }
@@ -165,10 +165,10 @@ export class LearningController {
 
   @Post('words') @UseGuards(JwtGuard)
   async words(@Body() body: { level: string; exclude?: string[]; textbook?: string }) {
-    const normalize = (s: string): 'Primary' | 'Middle' | 'High' | 'University' | 'Professional' => {
+    const normalize = (s: string): 'Primary' | 'Middle' | 'High' | 'CET4' | 'CET6' => {
       const map: Record<string, any> = {
-        'Primary School (小学)': 'Primary', 'Junior High School (初中)': 'Middle', 'Senior High School (高中)': 'High', 'University (大学/四六级)': 'University', 'Professional/Study Abroad (雅思/托福/职场)': 'Professional',
-        'Primary': 'Primary', 'Middle': 'Middle', 'High': 'High', 'University': 'University', 'Professional': 'Professional'
+        'Primary School (小学)': 'Primary', 'Junior High School (初中)': 'Middle', 'Senior High School (高中)': 'High', 'CET-4 (四级)': 'CET4', 'CET-6 (六级)': 'CET6',
+        'Primary': 'Primary', 'Middle': 'Middle', 'High': 'High', 'CET4': 'CET4', 'CET6': 'CET6'
       }
       return map[s] || 'Primary'
     }
