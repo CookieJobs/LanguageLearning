@@ -84,7 +84,7 @@ export const HomePage: React.FC = () => {
 
                 <Button
                   disabled={isLoading}
-                  onClick={async () => { await startNextSession(currentLevel); navigate('/learn'); }}
+                  onClick={async () => { await startNextSession(); navigate('/learn'); }}
                   variant="duo-primary"
                   className="px-10 py-5 text-xl h-auto"
                 >

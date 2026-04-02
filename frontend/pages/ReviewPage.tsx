@@ -53,7 +53,7 @@ export const ReviewPage: React.FC = () => {
     example: '',
     userSentence: '已掌握',
     masteredAt: w.lastMastered || new Date().toISOString(),
-    sourceLevel: level
+    sourceLevel: level as EducationLevel
   })) || [];
 
   return (

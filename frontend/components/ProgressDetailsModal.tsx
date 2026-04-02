@@ -180,7 +180,7 @@ export const ProgressDetailsModal: React.FC<ProgressDetailsModalProps> = ({
                     {item.consecutiveCorrect !== undefined && item.consecutiveCorrect > 0 && (
                       <span className="text-[11px] px-2 py-1 rounded-lg bg-emerald-50 text-emerald-600 font-medium flex items-center gap-1">
                         <CheckCircle2 size={10} />
-                        连对{item.consecutiveCorrect}}
+                        连对{item.consecutiveCorrect}
                       </span>
                     )}
 
