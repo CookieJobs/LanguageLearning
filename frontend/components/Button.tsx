@@ -22,13 +22,13 @@ export const Button: React.FC<ButtonProps> = ({
   const baseStyles = "inline-flex items-center justify-center rounded-xl font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.97]";
 
   const variants = {
-    primary: "bg-duo-green text-white border-b-4 border-duo-green-dark hover:bg-[#61e002] active:border-b-0 active:translate-y-1 focus-visible:ring-duo-green shadow-none",
-    secondary: "bg-duo-blue text-white border-b-4 border-duo-blue-dark hover:bg-[#3dd2ff] active:border-b-0 active:translate-y-1 focus-visible:ring-duo-blue shadow-none",
+    primary: "bg-emerald-500 text-white border-b-4 border-emerald-600 hover:bg-emerald-400 active:border-b-0 active:translate-y-1 focus-visible:ring-emerald-500 shadow-none",
+    secondary: "bg-indigo-600 text-white border-b-4 border-indigo-700 hover:bg-indigo-500 active:border-b-0 active:translate-y-1 focus-visible:ring-indigo-600 shadow-none",
     outline: "bg-transparent text-gray-500 border-2 border-gray-200 border-b-4 hover:bg-gray-50 active:border-b-2 active:translate-y-[2px] focus-visible:ring-gray-400 shadow-none",
     ghost: "bg-transparent text-gray-500 border-2 border-transparent border-b-4 hover:bg-gray-100 active:border-b-0 active:translate-y-1 focus-visible:ring-gray-400 shadow-none",
-    danger: "bg-duo-red text-white border-b-4 border-duo-red-dark hover:bg-[#ff6464] active:border-b-0 active:translate-y-1 focus-visible:ring-duo-red shadow-none",
-    'duo-primary': "bg-duo-green text-white border-b-4 border-duo-green-dark hover:bg-[#61e002] active:border-b-0 active:translate-y-1 focus-visible:ring-duo-green shadow-none",
-    'duo-secondary': "bg-duo-blue text-white border-b-4 border-duo-blue-dark hover:bg-[#3dd2ff] active:border-b-0 active:translate-y-1 focus-visible:ring-duo-blue shadow-none",
+    danger: "bg-red-500 text-white border-b-4 border-red-600 hover:bg-red-400 active:border-b-0 active:translate-y-1 focus-visible:ring-red-500 shadow-none",
+    'duo-primary': "bg-emerald-500 text-white border-b-4 border-emerald-600 hover:bg-emerald-400 active:border-b-0 active:translate-y-1 focus-visible:ring-emerald-500 shadow-none",
+    'duo-secondary': "bg-indigo-600 text-white border-b-4 border-indigo-700 hover:bg-indigo-500 active:border-b-0 active:translate-y-1 focus-visible:ring-indigo-600 shadow-none",
     'duo-outline': "bg-transparent text-gray-500 border-2 border-gray-200 border-b-4 hover:bg-gray-50 active:border-b-2 active:translate-y-[2px] focus-visible:ring-gray-400 shadow-none",
   };
 

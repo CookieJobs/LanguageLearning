@@ -92,7 +92,7 @@ export const DashboardProgress: React.FC<DashboardProgressProps> = ({
           <Trophy className="text-yellow-400 fill-current" size={24} />
           <h2 className="text-lg sm:text-xl font-bold text-gray-800">学习进度</h2>
           {onClick && (
-            <div className="text-duo-green bg-green-50 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+            <div className="text-emerald-500 bg-green-50 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
                <ChevronRight size={18} strokeWidth={3} />
             </div>
           )}
@@ -106,7 +106,7 @@ export const DashboardProgress: React.FC<DashboardProgressProps> = ({
       <div className="relative h-4 w-full bg-gray-100 rounded-full mb-4 overflow-hidden flex">
         {masteredPercent > 0 && (
           <div 
-            className="h-full bg-duo-green transition-all duration-500 border-r border-white/20 last:border-r-0 cursor-pointer hover:brightness-110" 
+            className="h-full bg-emerald-500 transition-all duration-500 border-r border-white/20 last:border-r-0 cursor-pointer hover:brightness-110" 
             style={{ width: `${masteredPercent}%` }}
             title={`已掌握: ${stats.mastered}`}
             onClick={(e) => handleCategoryClick(e, 'mastered')}
@@ -114,7 +114,7 @@ export const DashboardProgress: React.FC<DashboardProgressProps> = ({
         )}
         {learningPercent > 0 && (
           <div 
-            className="h-full bg-duo-blue transition-all duration-500 border-r border-white/20 last:border-r-0 cursor-pointer hover:brightness-110" 
+            className="h-full bg-indigo-600 transition-all duration-500 border-r border-white/20 last:border-r-0 cursor-pointer hover:brightness-110" 
             style={{ width: `${learningPercent}%` }}
             title={`学习中: ${stats.learning}`}
             onClick={(e) => handleCategoryClick(e, 'learning')}
@@ -136,14 +136,14 @@ export const DashboardProgress: React.FC<DashboardProgressProps> = ({
           className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
           onClick={(e) => handleCategoryClick(e, 'mastered')}
         >
-          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-duo-green"></div>
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-500"></div>
           <span className="font-medium text-gray-700">已掌握 ({masteredPercent}%)</span>
         </div>
         <div 
           className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
           onClick={(e) => handleCategoryClick(e, 'learning')}
         >
-          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-duo-blue"></div>
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-indigo-600"></div>
           <span className="font-medium text-gray-700">学习中 ({learningPercent}%)</span>
         </div>
         <div 

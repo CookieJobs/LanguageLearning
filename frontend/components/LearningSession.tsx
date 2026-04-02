@@ -169,11 +169,11 @@ export const LearningSession: React.FC<LearningSessionProps> = ({
             <div className="flex flex-col flex-1 max-w-3xl mx-auto">
                <div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">
                   <span>学习进度</span>
-                  <span className="text-duo-green">{currentIndex + 1} / {totalCount}</span>
+                  <span className="text-emerald-500">{currentIndex + 1} / {totalCount}</span>
                </div>
                <div className="h-3 w-full bg-gray-200 rounded-full overflow-hidden">
                   <div
-                     className="h-full bg-duo-yellow rounded-full transition-all duration-500 ease-out"
+                     className="h-full bg-amber-400 rounded-full transition-all duration-500 ease-out"
                      style={{ width: `${progressPercentage}%` }}
                   />
                </div>
@@ -183,7 +183,7 @@ export const LearningSession: React.FC<LearningSessionProps> = ({
 
          <div className="flex flex-col flex-1 overflow-hidden relative">
             {/* TOP COLUMN: Word/Question Display */}
-            <div className="w-full py-8 md:py-10 bg-duo-blue relative flex flex-col items-center justify-center px-6 md:px-8 text-white shadow-none z-10 border-b-4 border-[#1899d6] shrink-0">
+            <div className="w-full py-8 md:py-10 bg-indigo-600 relative flex flex-col items-center justify-center px-6 md:px-8 text-white shadow-none z-10 border-b-4 border-[#1899d6] shrink-0">
                
                <div className="relative z-10 text-center animate-fade-in-up">
                   <h1 className={`font-bold mb-4 leading-relaxed drop-shadow-sm break-words max-w-full ${

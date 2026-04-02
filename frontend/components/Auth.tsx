@@ -83,7 +83,7 @@ export const Auth: React.FC<AuthProps> = ({ onAuthed }) => {
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2 ml-1">邮箱</label>
                   <input
-                    className="w-full bg-gray-100 border-2 border-transparent rounded-xl px-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:bg-white focus:border-duo-blue transition-all font-medium"
+                    className="w-full bg-gray-100 border-2 border-transparent rounded-xl px-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:bg-white focus:border-indigo-600 transition-all font-medium"
                     placeholder="name@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -98,7 +98,7 @@ export const Auth: React.FC<AuthProps> = ({ onAuthed }) => {
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2 ml-1">密码</label>
                   <input
-                    className="w-full bg-gray-100 border-2 border-transparent rounded-xl px-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:bg-white focus:border-duo-blue transition-all font-medium"
+                    className="w-full bg-gray-100 border-2 border-transparent rounded-xl px-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:bg-white focus:border-indigo-600 transition-all font-medium"
                     placeholder="••••••••"
                     type="password"
                     value={password}
