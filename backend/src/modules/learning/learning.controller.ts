@@ -34,6 +34,827 @@ export class LearningController {
   @Get('session') @UseGuards(JwtGuard)
   async getSession(@Req() req: any, @Query('level') level?: string, @Query('textbook') textbook?: string) {
     const userId = req.user.id
+    // Louis 新学习路径：每次 10 题 = 4 旧词（stage 1-2）+ 6 新词
+    // 旧词：按当前 stage 出题（stage 0-1 选择，stage 2 填空，stage 3 造句）
+    const oldWords = await this.scheduler.getDueWords(userId, 4)
+    for (const item of oldWords) {
+      const w = item as any
+      const stage = w.progress?.stage ?? 0
+      let question: any
+      if (stage === 0 || stage === 1) {
+        question = await this.questionGenerator.generateChoiceQuestion(w, Math.random() > 0.5 ? 'en-zh' : 'zh-en')
+      } else if (stage === 2) {
+        question = await this.questionGenerator.generateFillInBlankQuestion(w)
+      } else {
+        question = await this.questionGenerator.generateSentenceQuestion(w)
+      }
+      question.word = {
+        word: w.headword,
+        definition: w.definitionZh,
+        partOfSpeech: w.pos,
+        example: w.exampleEn,
+        audioUrl: w.audioUrl
+
+    // Louis 新学习路径：每次 10 题 = 4 旧词（stage 1-2）+ 6 新词
+    // 旧词：按当前 stage 出题（stage 0-1 选择，stage 2 填空，stage 3 造句）
+    const oldWords = await this.scheduler.getDueWords(userId, 4)
+    for (const item of oldWords) {
+      const w = item as any
+      const stage = w.progress?.stage ?? 0
+      let question: any
+      if (stage === 0 || stage === 1) {
+        question = await this.questionGenerator.generateChoiceQuestion(w, Math.random() > 0.5 ? 'en-zh' : 'zh-en')
+      } else if (stage === 2) {
+        question = await this.questionGenerator.generateFillInBlankQuestion(w)
+      } else {
+        question = await this.questionGenerator.generateSentenceQuestion(w)
+      }
+      question.word = {
+        word: w.headword,
+        definition: w.definitionZh,
+        partOfSpeech: w.pos,
+        example: w.exampleEn,
+        audioUrl: w.audioUrl
+      }
+      questions.push(question)
+    }
+
+    // 新词：出英选汉/汉选英基础题
+    const neededSlots = Math.max(0, 10 - oldWords.length)
+    if (neededSlots > 0) {
+      const newWords = await this.vocab.pickWords(
+        levelCode,
+        allLearned.map((w: any) => w._id),
+        neededSlots,
+        Math.random().toString(),
+        textbook
+      )
+      for (const word of newWords) {
+        const w = word as any
+        const mode = Math.random() > 0.5 ? 'en-zh' : 'zh-en'
+        const q: any = await this.questionGenerator.generateChoiceQuestion(w, mode)
+        q.word = {
+          word: w.headword,
+          definition: w.definitionZh,
+          partOfSpeech: w.pos,
+          example: w.exampleEn,
+          audioUrl: w.audioUrl
+        }
+        questions.push(q)
+      }
+    }
+
+
+          example: w.exampleEn,
+          audioUrl: w.audioUrl
+        }
+        questions.push(q)
+      }
+    }
+
+      questions.push(q)
+    }
+
+    return questionsse, ../../common/jwt.guard, ../stats/stats.service, ./vocab.service, ./deepseek.service, ./mastery.schema
+// output: LearningController, route:learning
+// pos: 后端/学习模块
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
+import { Body, Controller, Post, UseGuards, Req, Get, Query, BadRequestException, Res } from '@nestjs/common'
+import { InjectModel } from '@nestjs/mongoose'
+import { Model } from 'mongoose'
+import { JwtGuard } from '../../common/jwt.guard'
+import { StatsService } from '../stats/stats.service'
+import { VocabService } from './vocab.service'
+import { WordMasteryDocument } from './mastery.schema'
+import { TextbookService } from './textbook.service'
+import { ProgressService } from './progress.service'
+import fetch from 'node-fetch'
+import { Response } from 'express'
+
+import { DeepSeekService } from './deepseek.service'
+import { LearningSchedulerService } from './learning-scheduler.service'
+import { QuestionGeneratorService } from './question-generator.service'
+
+@Controller('learning')
+export class LearningController {
+  constructor(
+    @InjectModel('WordMastery') private masteryModel: Model<WordMasteryDocument>,
+    private vocab: VocabService,
+    private stats: StatsService,
+    private deepseek: DeepSeekService,
+    private textbookService: TextbookService,
+    private progressService: ProgressService,
+    private scheduler: LearningSchedulerService,
+    private questionGenerator: QuestionGeneratorService
+  ) { }
+
+  @Get('session') @UseGuards(JwtGuard)
+  async getSession(@Req() req: any, @Query('level') level?: string, @Query('textbook') textbook?: string) {
+    const userId = req.user.id
+    // Louis 新学习路径：每次 10 题 = 4 旧词（stage 1-2）+ 6 新词
+    // 旧词：按当前 stage 出题（stage 0-1 选择，stage 2 填空，stage 3 造句）
+    const oldWords = await this.scheduler.getDueWords(userId, 4)
+    for (const item of oldWords) {
+      const w = item as any
+      const stage = w.progress?.stage ?? 0
+      let question: any
+      if (stage === 0 || stage === 1) {
+        question = await this.questionGenerator.generateChoiceQuestion(w, Math.random() > 0.5 ? 'en-zh' : 'zh-en')
+      } else if (stage === 2) {
+        question = await this.questionGenerator.generateFillInBlankQuestion(w)
+      } else {
+        question = await this.questionGenerator.generateSentenceQuestion(w)
+      }
+      question.word = {
+        word: w.headword,
+        definition: w.definitionZh,
+        partOfSpeech: w.pos,
+        example: w.exampleEn,
+        audioUrl: w.audioUrl
+      }
+      questions.push(question)
+    }
+
+    // 新词：出英选汉/汉选英基础题
+    const neededSlots = Math.max(0, 10 - oldWords.length)
+    if (neededSlots > 0) {
+      const newWords = await this.vocab.pickWords(
+        levelCode,
+        allLearned.map((w: any) => w._id),
+        neededSlots,
+        Math.random().toString(),
+        textbook
+      )
+      for (const word of newWords) {
+        const w = word as any
+        const mode = Math.random() > 0.5 ? 'en-zh' : 'zh-en'
+        const q: any = await this.questionGenerator.generateChoiceQuestion(w, mode)
+        q.word = {
+          word: w.headword,
+          definition: w.definitionZh,
+          partOfSpeech: w.pos,
+          example: w.exampleEn,
+          audioUrl: w.audioUrl
+        }
+        questions.push(q)
+      }
+    }
+
+
+      questions.push(q)
+    }
+
+
+    return questionse, ../../common/jwt.guard, ../stats/stats.service, ./vocab.service, ./deepseek.service, ./mastery.schema
+// output: LearningController, route:learning
+// pos: 后端/学习模块
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
+import { Body, Controller, Post, UseGuards, Req, Get, Query, BadRequestException, Res } from '@nestjs/common'
+import { InjectModel } from '@nestjs/mongoose'
+import { Model } from 'mongoose'
+import { JwtGuard } from '../../common/jwt.guard'
+import { StatsService } from '../stats/stats.service'
+import { VocabService } from './vocab.service'
+import { WordMasteryDocument } from './mastery.schema'
+import { TextbookService } from './textbook.service'
+import { ProgressService } from './progress.service'
+import fetch from 'node-fetch'
+import { Response } from 'express'
+
+import { DeepSeekService } from './deepseek.service'
+import { LearningSchedulerService } from './learning-scheduler.service'
+import { QuestionGeneratorService } from './question-generator.service'
+
+@Controller('learning')
+export class LearningController {
+  constructor(
+    @InjectModel('WordMastery') private masteryModel: Model<WordMasteryDocument>,
+    private vocab: VocabService,
+    private stats: StatsService,
+    private deepseek: DeepSeekService,
+    private textbookService: TextbookService,
+    private progressService: ProgressService,
+    private scheduler: LearningSchedulerService,
+    private questionGenerator: QuestionGeneratorService
+  ) { }
+
+  @Get('session') @UseGuards(JwtGuard)
+  async getSession(@Req() req: any, @Query('level') level?: string, @Query('textbook') textbook?: string) {
+    const userId = req.user.id
+    // Louis 新学习路径：每次 10 题 = 4 旧词（stage 1-2）+ 6 新词
+    // 旧词：按当前 stage 出题（stage 0-1 选择，stage 2 填空，stage 3 造句）
+    const oldWords = await this.scheduler.getDueWords(userId, 4)
+    for (const item of oldWords) {
+      const w = item as any
+      const stage = w.progress?.stage ?? 0
+      let question: any
+      if (stage === 0 || stage === 1) {
+        question = await this.questionGenerator.generateChoiceQuestion(w, Math.random() > 0.5 ? 'en-zh' : 'zh-en')
+      } else if (stage === 2) {
+        question = await this.questionGenerator.generateFillInBlankQuestion(w)
+      } else {
+        question = await this.questionGenerator.generateSentenceQuestion(w)
+      }
+      question.word = {
+        word: w.headword,
+        definition: w.definitionZh,
+        partOfSpeech: w.pos,
+        example: w.exampleEn,
+        audioUrl: w.audioUrl
+      }
+      questions.push(question)
+    }
+
+    // 新词：出英选汉/汉选英基础题
+    const neededSlots = Math.max(0, 10 - oldWords.length)
+    if (neededSlots > 0) {
+      const newWords = await this.vocab.pickWords(
+        levelCode,
+        allLearned.map((w: any) => w._id),
+        neededSlots,
+        Math.random().toString(),
+        textbook
+      )
+      for (const word of newWords) {
+        const w = word as any
+        const mode = Math.random() > 0.5 ? 'en-zh' : 'zh-en'
+        const q: any = await this.questionGenerator.generateChoiceQuestion(w, mode)
+        q.word = {
+          word: w.headword,
+          definition: w.definitionZh,
+          partOfSpeech: w.pos,
+          example: w.exampleEn,
+          audioUrl: w.audioUrl
+        }
+        questions.push(q)
+      }
+    }
+
+      questions.push(q)
+    }
+
+    return questionsse, ../../common/jwt.guard, ../stats/stats.service, ./vocab.service, ./deepseek.service, ./mastery.schema
+// output: LearningController, route:learning
+// pos: 后端/学习模块
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
+import { Body, Controller, Post, UseGuards, Req, Get, Query, BadRequestException, Res } from '@nestjs/common'
+import { InjectModel } from '@nestjs/mongoose'
+import { Model } from 'mongoose'
+import { JwtGuard } from '../../common/jwt.guard'
+import { StatsService } from '../stats/stats.service'
+import { VocabService } from './vocab.service'
+import { WordMasteryDocument } from './mastery.schema'
+import { TextbookService } from './textbook.service'
+import { ProgressService } from './progress.service'
+import fetch from 'node-fetch'
+import { Response } from 'express'
+
+import { DeepSeekService } from './deepseek.service'
+import { LearningSchedulerService } from './learning-scheduler.service'
+import { QuestionGeneratorService } from './question-generator.service'
+
+@Controller('learning')
+export class LearningController {
+  constructor(
+    @InjectModel('WordMastery') private masteryModel: Model<WordMasteryDocument>,
+    private vocab: VocabService,
+    private stats: StatsService,
+    private deepseek: DeepSeekService,
+    private textbookService: TextbookService,
+    private progressService: ProgressService,
+    private scheduler: LearningSchedulerService,
+    private questionGenerator: QuestionGeneratorService
+  ) { }
+
+  @Get('session') @UseGuards(JwtGuard)
+  async getSession(@Req() req: any, @Query('level') level?: string, @Query('textbook') textbook?: string) {
+    const userId = req.user.id
+    // Louis 新学习路径：每次 10 题 = 4 旧词（stage 1-2）+ 6 新词
+    // 旧词：按当前 stage 出题（stage 0-1 选择，stage 2 填空，stage 3 造句）
+    const oldWords = await this.scheduler.getDueWords(userId, 4)
+    for (const item of oldWords) {
+      const w = item as any
+      const stage = w.progress?.stage ?? 0
+      let question: any
+      if (stage === 0 || stage === 1) {
+        question = await this.questionGenerator.generateChoiceQuestion(w, Math.random() > 0.5 ? 'en-zh' : 'zh-en')
+      } else if (stage === 2) {
+        question = await this.questionGenerator.generateFillInBlankQuestion(w)
+      } else {
+        question = await this.questionGenerator.generateSentenceQuestion(w)
+      }
+      question.word = {
+        word: w.headword,
+        definition: w.definitionZh,
+        partOfSpeech: w.pos,
+        example: w.exampleEn,
+        audioUrl: w.audioUrl
+      }
+      questions.push(question)
+    }
+
+    // 新词：出英选汉/汉选英基础题
+    const neededSlots = Math.max(0, 10 - oldWords.length)
+    if (neededSlots > 0) {
+      const newWords = await this.vocab.pickWords(
+        levelCode,
+        allLearned.map((w: any) => w._id),
+        neededSlots,
+        Math.random().toString(),
+        textbook
+      )
+      for (const word of newWords) {
+        const w = word as any
+        const mode = Math.random() > 0.5 ? 'en-zh' : 'zh-en'
+        const q: any = await this.questionGenerator.generateChoiceQuestion(w, mode)
+        q.word = {
+          word: w.headword,
+          definition: w.definitionZh,
+          partOfSpeech: w.pos,
+          example: w.exampleEn,
+          audioUrl: w.audioUrl
+        }
+        questions.push(q)
+      }
+    }
+
+
+    return questionse, ../../common/jwt.guard, ../stats/stats.service, ./vocab.service, ./deepseek.service, ./mastery.schema
+// output: LearningController, route:learning
+// pos: 后端/学习模块
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
+import { Body, Controller, Post, UseGuards, Req, Get, Query, BadRequestException, Res } from '@nestjs/common'
+import { InjectModel } from '@nestjs/mongoose'
+import { Model } from 'mongoose'
+import { JwtGuard } from '../../common/jwt.guard'
+import { StatsService } from '../stats/stats.service'
+import { VocabService } from './vocab.service'
+import { WordMasteryDocument } from './mastery.schema'
+import { TextbookService } from './textbook.service'
+import { ProgressService } from './progress.service'
+import fetch from 'node-fetch'
+import { Response } from 'express'
+
+import { DeepSeekService } from './deepseek.service'
+import { LearningSchedulerService } from './learning-scheduler.service'
+import { QuestionGeneratorService } from './question-generator.service'
+
+@Controller('learning')
+export class LearningController {
+  constructor(
+    @InjectModel('WordMastery') private masteryModel: Model<WordMasteryDocument>,
+    private vocab: VocabService,
+    private stats: StatsService,
+    private deepseek: DeepSeekService,
+    private textbookService: TextbookService,
+    private progressService: ProgressService,
+    private scheduler: LearningSchedulerService,
+    private questionGenerator: QuestionGeneratorService
+  ) { }
+
+  @Get('session') @UseGuards(JwtGuard)
+  async getSession(@Req() req: any, @Query('level') level?: string, @Query('textbook') textbook?: string) {
+    const userId = req.user.id
+    // Louis 新学习路径：每次 10 题 = 4 旧词（stage 1-2）+ 6 新词
+    // 旧词：按当前 stage 出题（stage 0-1 选择，stage 2 填空，stage 3 造句）
+    const oldWords = await this.scheduler.getDueWords(userId, 4)
+    for (const item of oldWords) {
+      const w = item as any
+      const stage = w.progress?.stage ?? 0
+      let question: any
+      if (stage === 0 || stage === 1) {
+        question = await this.questionGenerator.generateChoiceQuestion(w, Math.random() > 0.5 ? 'en-zh' : 'zh-en')
+      } else if (stage === 2) {
+        question = await this.questionGenerator.generateFillInBlankQuestion(w)
+      } else {
+        question = await this.questionGenerator.generateSentenceQuestion(w)
+      }
+      question.word = {
+        word: w.headword,
+        definition: w.definitionZh,
+        partOfSpeech: w.pos,
+        example: w.exampleEn,
+        audioUrl: w.audioUrl
+      }
+      questions.push(question)
+    }
+
+    // 新词：出英选汉/汉选英基础题
+    const neededSlots = Math.max(0, 10 - oldWords.length)
+    if (neededSlots > 0) {
+      const newWords = await this.vocab.pickWords(
+        levelCode,
+        allLearned.map((w: any) => w._id),
+        neededSlots,
+        Math.random().toString(),
+        textbook
+      )
+      for (const word of newWords) {
+        const w = word as any
+        const mode = Math.random() > 0.5 ? 'en-zh' : 'zh-en'
+        const q: any = await this.questionGenerator.generateChoiceQuestion(w, mode)
+        q.word = {
+          word: w.headword,
+          definition: w.definitionZh,
+          partOfSpeech: w.pos,
+          example: w.exampleEn,
+          audioUrl: w.audioUrl
+        }
+        questions.push(q)
+      }
+    }
+
+      questions.push(q)
+    }
+
+    return questionsse, ../../common/jwt.guard, ../stats/stats.service, ./vocab.service, ./deepseek.service, ./mastery.schema
+// output: LearningController, route:learning
+// pos: 后端/学习模块
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
+import { Body, Controller, Post, UseGuards, Req, Get, Query, BadRequestException, Res } from '@nestjs/common'
+import { InjectModel } from '@nestjs/mongoose'
+import { Model } from 'mongoose'
+import { JwtGuard } from '../../common/jwt.guard'
+import { StatsService } from '../stats/stats.service'
+import { VocabService } from './vocab.service'
+import { WordMasteryDocument } from './mastery.schema'
+import { TextbookService } from './textbook.service'
+import { ProgressService } from './progress.service'
+import fetch from 'node-fetch'
+import { Response } from 'express'
+
+import { DeepSeekService } from './deepseek.service'
+import { LearningSchedulerService } from './learning-scheduler.service'
+import { QuestionGeneratorService } from './question-generator.service'
+
+@Controller('learning')
+export class LearningController {
+  constructor(
+    @InjectModel('WordMastery') private masteryModel: Model<WordMasteryDocument>,
+    private vocab: VocabService,
+    private stats: StatsService,
+    private deepseek: DeepSeekService,
+    private textbookService: TextbookService,
+    private progressService: ProgressService,
+    private scheduler: LearningSchedulerService,
+    private questionGenerator: QuestionGeneratorService
+  ) { }
+
+  @Get('session') @UseGuards(JwtGuard)
+  async getSession(@Req() req: any, @Query('level') level?: string, @Query('textbook') textbook?: string) {
+    const userId = req.user.id
+    // Louis 新学习路径：每次 10 题 = 4 旧词（stage 1-2）+ 6 新词
+    // 旧词：按当前 stage 出题（stage 0-1 选择，stage 2 填空，stage 3 造句）
+    const oldWords = await this.scheduler.getDueWords(userId, 4)
+    for (const item of oldWords) {
+      const w = item as any
+      const stage = w.progress?.stage ?? 0
+      let question: any
+      if (stage === 0 || stage === 1) {
+        question = await this.questionGenerator.generateChoiceQuestion(w, Math.random() > 0.5 ? 'en-zh' : 'zh-en')
+      } else if (stage === 2) {
+        question = await this.questionGenerator.generateFillInBlankQuestion(w)
+      } else {
+        question = await this.questionGenerator.generateSentenceQuestion(w)
+      }
+      question.word = {
+        word: w.headword,
+        definition: w.definitionZh,
+        partOfSpeech: w.pos,
+        example: w.exampleEn,
+        audioUrl: w.audioUrl
+      }
+      questions.push(question)
+    }
+
+    // 新词：出英选汉/汉选英基础题
+    const neededSlots = Math.max(0, 10 - oldWords.length)
+    if (neededSlots > 0) {
+      const newWords = await this.vocab.pickWords(
+        levelCode,
+        allLearned.map((w: any) => w._id),
+        neededSlots,
+        Math.random().toString(),
+        textbook
+      )
+      for (const word of newWords) {
+        const w = word as any
+        const mode = Math.random() > 0.5 ? 'en-zh' : 'zh-en'
+        const q: any = await this.questionGenerator.generateChoiceQuestion(w, mode)
+        q.word = {
+          word: w.headword,
+          definition: w.definitionZh,
+          partOfSpeech: w.pos,
+          example: w.exampleEn,
+          audioUrl: w.audioUrl
+        }
+        questions.push(q)
+      }
+    }
+
+
+      questions.push(q)
+    }
+
+
+    return questionse, ../../common/jwt.guard, ../stats/stats.service, ./vocab.service, ./deepseek.service, ./mastery.schema
+// output: LearningController, route:learning
+// pos: 后端/学习模块
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
+import { Body, Controller, Post, UseGuards, Req, Get, Query, BadRequestException, Res } from '@nestjs/common'
+import { InjectModel } from '@nestjs/mongoose'
+import { Model } from 'mongoose'
+import { JwtGuard } from '../../common/jwt.guard'
+import { StatsService } from '../stats/stats.service'
+import { VocabService } from './vocab.service'
+import { WordMasteryDocument } from './mastery.schema'
+import { TextbookService } from './textbook.service'
+import { ProgressService } from './progress.service'
+import fetch from 'node-fetch'
+import { Response } from 'express'
+
+import { DeepSeekService } from './deepseek.service'
+import { LearningSchedulerService } from './learning-scheduler.service'
+import { QuestionGeneratorService } from './question-generator.service'
+
+@Controller('learning')
+export class LearningController {
+  constructor(
+    @InjectModel('WordMastery') private masteryModel: Model<WordMasteryDocument>,
+    private vocab: VocabService,
+    private stats: StatsService,
+    private deepseek: DeepSeekService,
+    private textbookService: TextbookService,
+    private progressService: ProgressService,
+    private scheduler: LearningSchedulerService,
+    private questionGenerator: QuestionGeneratorService
+  ) { }
+
+  @Get('session') @UseGuards(JwtGuard)
+  async getSession(@Req() req: any, @Query('level') level?: string, @Query('textbook') textbook?: string) {
+    const userId = req.user.id
+    // Louis 新学习路径：每次 10 题 = 4 旧词（stage 1-2）+ 6 新词
+    // 旧词：按当前 stage 出题（stage 0-1 选择，stage 2 填空，stage 3 造句）
+    const oldWords = await this.scheduler.getDueWords(userId, 4)
+    for (const item of oldWords) {
+      const w = item as any
+      const stage = w.progress?.stage ?? 0
+      let question: any
+      if (stage === 0 || stage === 1) {
+        question = await this.questionGenerator.generateChoiceQuestion(w, Math.random() > 0.5 ? 'en-zh' : 'zh-en')
+      } else if (stage === 2) {
+        question = await this.questionGenerator.generateFillInBlankQuestion(w)
+      } else {
+        question = await this.questionGenerator.generateSentenceQuestion(w)
+      }
+      question.word = {
+        word: w.headword,
+        definition: w.definitionZh,
+        partOfSpeech: w.pos,
+        example: w.exampleEn,
+        audioUrl: w.audioUrl
+      }
+      questions.push(question)
+    }
+
+    // 新词：出英选汉/汉选英基础题
+    const neededSlots = Math.max(0, 10 - oldWords.length)
+    if (neededSlots > 0) {
+      const newWords = await this.vocab.pickWords(
+        levelCode,
+        allLearned.map((w: any) => w._id),
+        neededSlots,
+        Math.random().toString(),
+        textbook
+      )
+      for (const word of newWords) {
+        const w = word as any
+        const mode = Math.random() > 0.5 ? 'en-zh' : 'zh-en'
+        const q: any = await this.questionGenerator.generateChoiceQuestion(w, mode)
+        q.word = {
+          word: w.headword,
+          definition: w.definitionZh,
+          partOfSpeech: w.pos,
+          example: w.exampleEn,
+          audioUrl: w.audioUrl
+        }
+        questions.push(q)
+      }
+    }
+
+      questions.push(q)
+    }
+
+    return questionsse, ../../common/jwt.guard, ../stats/stats.service, ./vocab.service, ./deepseek.service, ./mastery.schema
+// output: LearningController, route:learning
+// pos: 后端/学习模块
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
+import { Body, Controller, Post, UseGuards, Req, Get, Query, BadRequestException, Res } from '@nestjs/common'
+import { InjectModel } from '@nestjs/mongoose'
+import { Model } from 'mongoose'
+import { JwtGuard } from '../../common/jwt.guard'
+import { StatsService } from '../stats/stats.service'
+import { VocabService } from './vocab.service'
+import { WordMasteryDocument } from './mastery.schema'
+import { TextbookService } from './textbook.service'
+import { ProgressService } from './progress.service'
+import fetch from 'node-fetch'
+import { Response } from 'express'
+
+import { DeepSeekService } from './deepseek.service'
+import { LearningSchedulerService } from './learning-scheduler.service'
+import { QuestionGeneratorService } from './question-generator.service'
+
+@Controller('learning')
+export class LearningController {
+  constructor(
+    @InjectModel('WordMastery') private masteryModel: Model<WordMasteryDocument>,
+    private vocab: VocabService,
+    private stats: StatsService,
+    private deepseek: DeepSeekService,
+    private textbookService: TextbookService,
+    private progressService: ProgressService,
+    private scheduler: LearningSchedulerService,
+    private questionGenerator: QuestionGeneratorService
+  ) { }
+
+  @Get('session') @UseGuards(JwtGuard)
+  async getSession(@Req() req: any, @Query('level') level?: string, @Query('textbook') textbook?: string) {
+    const userId = req.user.id
+    // Louis 新学习路径：每次 10 题 = 4 旧词（stage 1-2）+ 6 新词
+    // 旧词：按当前 stage 出题（stage 0-1 选择，stage 2 填空，stage 3 造句）
+    const oldWords = await this.scheduler.getDueWords(userId, 4)
+    for (const item of oldWords) {
+      const w = item as any
+      const stage = w.progress?.stage ?? 0
+      let question: any
+      if (stage === 0 || stage === 1) {
+        question = await this.questionGenerator.generateChoiceQuestion(w, Math.random() > 0.5 ? 'en-zh' : 'zh-en')
+      } else if (stage === 2) {
+        question = await this.questionGenerator.generateFillInBlankQuestion(w)
+      } else {
+        question = await this.questionGenerator.generateSentenceQuestion(w)
+      }
+      question.word = {
+        word: w.headword,
+        definition: w.definitionZh,
+        partOfSpeech: w.pos,
+        example: w.exampleEn,
+        audioUrl: w.audioUrl
+      }
+      questions.push(question)
+    }
+
+    // 新词：出英选汉/汉选英基础题
+    const neededSlots = Math.max(0, 10 - oldWords.length)
+    if (neededSlots > 0) {
+      const newWords = await this.vocab.pickWords(
+        levelCode,
+        allLearned.map((w: any) => w._id),
+        neededSlots,
+        Math.random().toString(),
+        textbook
+      )
+      for (const word of newWords) {
+        const w = word as any
+        const mode = Math.random() > 0.5 ? 'en-zh' : 'zh-en'
+        const q: any = await this.questionGenerator.generateChoiceQuestion(w, mode)
+        q.word = {
+          word: w.headword,
+          definition: w.definitionZh,
+          partOfSpeech: w.pos,
+          example: w.exampleEn,
+          audioUrl: w.audioUrl
+        }
+        questions.push(q)
+      }
+    }
+
+
+    return questionse, ../../common/jwt.guard, ../stats/stats.service, ./vocab.service, ./deepseek.service, ./mastery.schema
+// output: LearningController, route:learning
+// pos: 后端/学习模块
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
+import { Body, Controller, Post, UseGuards, Req, Get, Query, BadRequestException, Res } from '@nestjs/common'
+import { InjectModel } from '@nestjs/mongoose'
+import { Model } from 'mongoose'
+import { JwtGuard } from '../../common/jwt.guard'
+import { StatsService } from '../stats/stats.service'
+import { VocabService } from './vocab.service'
+import { WordMasteryDocument } from './mastery.schema'
+import { TextbookService } from './textbook.service'
+import { ProgressService } from './progress.service'
+import fetch from 'node-fetch'
+import { Response } from 'express'
+
+import { DeepSeekService } from './deepseek.service'
+import { LearningSchedulerService } from './learning-scheduler.service'
+import { QuestionGeneratorService } from './question-generator.service'
+
+@Controller('learning')
+export class LearningController {
+  constructor(
+    @InjectModel('WordMastery') private masteryModel: Model<WordMasteryDocument>,
+    private vocab: VocabService,
+    private stats: StatsService,
+    private deepseek: DeepSeekService,
+    private textbookService: TextbookService,
+    private progressService: ProgressService,
+    private scheduler: LearningSchedulerService,
+    private questionGenerator: QuestionGeneratorService
+  ) { }
+
+  @Get('session') @UseGuards(JwtGuard)
+  async getSession(@Req() req: any, @Query('level') level?: string, @Query('textbook') textbook?: string) {
+    const userId = req.user.id
+    // Louis 新学习路径：每次 10 题 = 4 旧词（stage 1-2）+ 6 新词
+    // 旧词：按当前 stage 出题（stage 0-1 选择，stage 2 填空，stage 3 造句）
+    const oldWords = await this.scheduler.getDueWords(userId, 4)
+    for (const item of oldWords) {
+      const w = item as any
+      const stage = w.progress?.stage ?? 0
+      let question: any
+      if (stage === 0 || stage === 1) {
+        question = await this.questionGenerator.generateChoiceQuestion(w, Math.random() > 0.5 ? 'en-zh' : 'zh-en')
+      } else if (stage === 2) {
+        question = await this.questionGenerator.generateFillInBlankQuestion(w)
+      } else {
+        question = await this.questionGenerator.generateSentenceQuestion(w)
+      }
+      question.word = {
+        word: w.headword,
+        definition: w.definitionZh,
+        partOfSpeech: w.pos,
+        example: w.exampleEn,
+        audioUrl: w.audioUrl
+      }
+      questions.push(question)
+    }
+
+    // 新词：出英选汉/汉选英基础题
+    const neededSlots = Math.max(0, 10 - oldWords.length)
+    if (neededSlots > 0) {
+      const newWords = await this.vocab.pickWords(
+        levelCode,
+        allLearned.map((w: any) => w._id),
+        neededSlots,
+        Math.random().toString(),
+        textbook
+      )
+      for (const word of newWords) {
+        const w = word as any
+        const mode = Math.random() > 0.5 ? 'en-zh' : 'zh-en'
+        const q: any = await this.questionGenerator.generateChoiceQuestion(w, mode)
+        q.word = {
+          word: w.headword,
+          definition: w.definitionZh,
+          partOfSpeech: w.pos,
+          example: w.exampleEn,
+          audioUrl: w.audioUrl
+        }
+        questions.push(q)
+      }
+    }
+
+      questions.push(q)
+    }
+
+    return questionsse, ../../common/jwt.guard, ../stats/stats.service, ./vocab.service, ./deepseek.service, ./mastery.schema
+// output: LearningController, route:learning
+// pos: 后端/学习模块
+// 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
+import { Body, Controller, Post, UseGuards, Req, Get, Query, BadRequestException, Res } from '@nestjs/common'
+import { InjectModel } from '@nestjs/mongoose'
+import { Model } from 'mongoose'
+import { JwtGuard } from '../../common/jwt.guard'
+import { StatsService } from '../stats/stats.service'
+import { VocabService } from './vocab.service'
+import { WordMasteryDocument } from './mastery.schema'
+import { TextbookService } from './textbook.service'
+import { ProgressService } from './progress.service'
+import fetch from 'node-fetch'
+import { Response } from 'express'
+
+import { DeepSeekService } from './deepseek.service'
+import { LearningSchedulerService } from './learning-scheduler.service'
+import { QuestionGeneratorService } from './question-generator.service'
+
+@Controller('learning')
+export class LearningController {
+  constructor(
+    @InjectModel('WordMastery') private masteryModel: Model<WordMasteryDocument>,
+    private vocab: VocabService,
+    private stats: StatsService,
+    private deepseek: DeepSeekService,
+    private textbookService: TextbookService,
+    private progressService: ProgressService,
+    private scheduler: LearningSchedulerService,
+    private questionGenerator: QuestionGeneratorService
+  ) { }
+
+  @Get('session') @UseGuards(JwtGuard)
+  async getSession(@Req() req: any, @Query('level') level?: string, @Query('textbook') textbook?: string) {
+    const userId = req.user.id
     const dueItems = await this.scheduler.getDueWords(userId, 10)
     
     const questions: any[] = []
@@ -54,28 +875,78 @@ export class LearningController {
         q = {
           wordId: String(word._id),
           type: 'sentence',
-          questionText: `Please write a sentence using "${word.headword}".`,
-          answer: word.headword
-        }
+    // Louis 新学习路径：每次 10 题 = 4 旧词（stage 1-2）+ 6 新词
+    // 旧词：按当前 stage 出题（stage 0-1 选择，stage 2 填空，stage 3 造句）
+    const oldWords = await this.scheduler.getDueWords(userId, 4)
+    for (const item of oldWords) {
+      const w = item as any
+      const stage = w.progress?.stage ?? 0
+      let question: any
+      if (stage === 0 || stage === 1) {
+        question = await this.questionGenerator.generateChoiceQuestion(w, Math.random() > 0.5 ? 'en-zh' : 'zh-en')
+      } else if (stage === 2) {
+        question = await this.questionGenerator.generateFillInBlankQuestion(w)
+      } else {
+        question = await this.questionGenerator.generateSentenceQuestion(w)
       }
-      
-      if (q) {
-        q.progressId = String(item._id)
+      question.word = {
+        word: w.headword,
+        definition: w.definitionZh,
+        partOfSpeech: w.pos,
+        example: w.exampleEn,
+        audioUrl: w.audioUrl
+      }
+      questions.push(question)
+    }
+
+    // 新词：出英选汉/汉选英基础题
+    const neededSlots = Math.max(0, 10 - oldWords.length)
+    if (neededSlots > 0) {
+      const newWords = await this.vocab.pickWords(
+        levelCode,
+        allLearned.map((w: any) => w._id),
+        neededSlots,
+        Math.random().toString(),
+        textbook
+      )
+      for (const word of newWords) {
+        const w = word as any
+        const mode = Math.random() > 0.5 ? 'en-zh' : 'zh-en'
+        const q: any = await this.questionGenerator.generateChoiceQuestion(w, mode)
         q.word = {
-            word: word.headword,
-            definition: word.definitionZh, // Use Chinese definition for now as primary
-            partOfSpeech: word.pos,
-            example: word.exampleEn,
-            audioUrl: word.audioUrl
+          word: w.headword,
+          definition: w.definitionZh,
+          partOfSpeech: w.pos,
+          example: w.exampleEn,
+          audioUrl: w.audioUrl
         }
         questions.push(q)
       }
     }
 
-    // Fill with new words if needed
-    if (questions.length < 10 && level) {
-       const countNeeded = 10 - questions.length
-       const allLearned = await this.scheduler.getAllLearnedWordIds(userId)
+    const neededSlots = Math.max(0, 10 - oldWords.length)
+    if (neededSlots > 0) {
+      const newWords = await this.vocab.pickWords(
+        levelCode,
+        allLearned.map((w: any) => w._id),
+        neededSlots,
+        Math.random().toString(),
+        textbook
+      )
+      for (const word of newWords) {
+        const w = word as any
+        const mode = Math.random() > 0.5 ? 'en-zh' : 'zh-en'
+        const q: any = await this.questionGenerator.generateChoiceQuestion(w, mode)
+        q.word = {
+          word: w.headword,
+          definition: w.definitionZh,
+          partOfSpeech: w.pos,
+          example: w.exampleEn,
+          audioUrl: w.audioUrl
+        }
+        questions.push(q)
+      }
+    }
        
        const normalize = (s: string) => {
           const map: Record<string, any> = {

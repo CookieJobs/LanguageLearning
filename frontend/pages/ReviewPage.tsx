@@ -4,6 +4,7 @@ import { fetchProgress, fetchTextbooks } from '../services/geminiService';
 import { EducationLevel, ProgressStats, MasteredItem } from '../types';
 import { ArrowLeft, BookOpen, Filter, CheckCircle2 } from 'lucide-react';
 import { ReviewList } from '../components/ReviewList';
+import { WordProgressBar } from '../components/WordProgressBar';
 
 import { useApp } from '../contexts/AppContext';
 
@@ -149,20 +150,30 @@ export const ReviewPage: React.FC = () => {
               )}
             </div>
 
-            {/* Optional: Show unmastered words list? 
-                    The user asked to see "what words represent this level".
-                    Let's show unmastered words as a simple list.
-                */}
+            {/* 未掌握单词列表 - 带进度条 */}
             <div>
               <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2 text-gray-400">
                 <div className="w-5 h-5 rounded-full border-2 border-gray-300" />
                 未掌握 ({params(stats?.totalCount || 0) - (stats?.masteredCount || 0)})
               </h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {stats?.list.filter(w => !w.mastered).slice(0, 50).map((w, i) => (
-                  <div key={i} className="p-3 bg-white border border-gray-100 rounded-xl text-gray-500 opacity-60">
-                    <div className="font-bold text-sm">{w.word}</div>
-                    <div className="text-xs truncate">{w.definition}</div>
+                  <div key={i} className="p-4 bg-white border border-gray-100 rounded-xl hover:border-brand-200 hover:shadow-sm transition-all">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="font-bold text-base text-gray-900">{w.word}</div>
+                      {w.wrongCount > 3 && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-50 text-red-600 font-medium">
+                          易错
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-xs text-gray-500 mb-3 line-clamp-1">{w.definition}</div>
+                    <WordProgressBar 
+                      stage={w.stage ?? 0} 
+                      showLabel={true}
+                      height={6}
+                      showNodes={false}
+                    />
                   </div>
                 ))}
                 {(stats?.list.filter(w => !w.mastered).length || 0) > 50 && (

@@ -208,6 +208,8 @@ export const fetchProgress = async (level?: string, textbook?: string): Promise<
       struggling: item.struggling ?? false,
       stage: item.stage ?? 0,
       wrongCount: item.wrongCount ?? 0,
+      consecutiveCorrect: item.consecutiveCorrect ?? 0,
+      exposureCount: item.exposureCount ?? 0,
       nextReviewAt: item.nextReviewAt ?? null
     }))
   }

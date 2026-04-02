@@ -49,6 +49,8 @@ export interface ProgressStats {
     lastMastered: string | null;
     stage: number;
     wrongCount: number;
+    consecutiveCorrect: number;
+    exposureCount: number;
     nextReviewAt: string | null;
   }[];
 }

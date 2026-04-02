@@ -82,6 +82,8 @@ export class ProgressService {
                 lastMastered: m?.lastMastered || null,
                 stage: p?.stage || 0,
                 wrongCount: p?.wrongCount || 0,
+                consecutiveCorrect: p?.consecutiveCorrect || 0,
+                exposureCount: p?.exposureCount || 0,
                 nextReviewAt: p?.nextReviewAt || null
             }
         })

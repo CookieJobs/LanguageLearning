@@ -8,6 +8,7 @@ export interface UserWordProgress {
   correctCount: number
   consecutiveCorrect: number
   wrongCount: number
+  wrongStreak: number // 连续答错次数，连续2次才降stage
   lastPracticedAt: Date
   nextReviewAt: Date
 }
@@ -22,6 +23,7 @@ export const UserWordProgressSchema = new Schema<UserWordProgress>({
   correctCount: { type: Number, required: true, default: 0 },
   consecutiveCorrect: { type: Number, required: true, default: 0 },
   wrongCount: { type: Number, required: true, default: 0 },
+  wrongStreak: { type: Number, required: true, default: 0 },
   lastPracticedAt: { type: Date, default: Date.now },
   nextReviewAt: { type: Date, default: Date.now, index: true }
 })

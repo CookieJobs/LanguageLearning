@@ -58,6 +58,7 @@ export class LearningSchedulerService {
         correctCount: 0,
         wrongCount: 0,
         consecutiveCorrect: 0,
+        wrongStreak: 0,
         lastPracticedAt: now,
         nextReviewAt: now
       })
@@ -69,6 +70,7 @@ export class LearningSchedulerService {
     if (isCorrect) {
       progress.correctCount += 1
       progress.consecutiveCorrect = (progress.consecutiveCorrect || 0) + 1
+      progress.wrongStreak = 0 // 重置连续答错计数
 
       // Reward for correct answer
       await this.walletService.addCoins(userId, 1, 'correct_answer')
@@ -129,7 +131,11 @@ export class LearningSchedulerService {
     } else {
       progress.wrongCount += 1
       progress.consecutiveCorrect = 0
-      progress.stage = 0 // demote to start
+      progress.wrongStreak = (progress.wrongStreak || 0) + 1
+      if (progress.wrongStreak >= 2) {
+        progress.stage = Math.max(0, progress.stage - 1) // 降一级，不归零
+        progress.wrongStreak = 0 // 重置连续答错计数
+      }
       progress.nextReviewAt = now // immediate review
     }
 
