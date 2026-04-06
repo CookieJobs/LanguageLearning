@@ -1,0 +1,5 @@
+- [x] `VocabWord` Schema 中成功添加 `contextualDefinitions` 字段
+- [x] 编写了 `generate-contextual-defs.ts` 脚本，能够利用 DeepSeek 批量生成指定教材的简化释义
+- [x] 脚本运行成功，数据已入库（以“人教版三年级起点三年级上”为例）
+- [x] 后端 API 在请求带 `textbook` 参数时，优先返回数据库中的特定释义
+- [x] 前端验证显示内容已变为 AI 生成的简化版本

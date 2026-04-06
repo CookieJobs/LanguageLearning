@@ -169,11 +169,11 @@ export const LearningSession: React.FC<LearningSessionProps> = ({
             <div className="flex flex-col flex-1 max-w-3xl mx-auto">
                <div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">
                   <span>学习进度</span>
-                  <span className="text-emerald-500">{currentIndex + 1} / {totalCount}</span>
+                  <span className="text-duo-green">{currentIndex + 1} / {totalCount}</span>
                </div>
                <div className="h-3 w-full bg-gray-200 rounded-full overflow-hidden">
                   <div
-                     className="h-full bg-amber-400 rounded-full transition-all duration-500 ease-out"
+                     className="h-full bg-duo-yellow rounded-full transition-all duration-500 ease-out"
                      style={{ width: `${progressPercentage}%` }}
                   />
                </div>
@@ -183,7 +183,7 @@ export const LearningSession: React.FC<LearningSessionProps> = ({
 
          <div className="flex flex-col flex-1 overflow-hidden relative">
             {/* TOP COLUMN: Word/Question Display */}
-            <div className="w-full py-8 md:py-10 bg-indigo-600 relative flex flex-col items-center justify-center px-6 md:px-8 text-white shadow-none z-10 border-b-4 border-[#1899d6] shrink-0">
+            <div className="w-full py-8 md:py-10 bg-duo-blue relative flex flex-col items-center justify-center px-6 md:px-8 text-white shadow-none z-10 border-b-4 border-[#1899d6] shrink-0">
                
                <div className="relative z-10 text-center animate-fade-in-up">
                   <h1 className={`font-bold mb-4 leading-relaxed drop-shadow-sm break-words max-w-full ${
@@ -224,13 +224,13 @@ export const LearningSession: React.FC<LearningSessionProps> = ({
                     {/* Left Column: Feedback */}
                     <div className="w-[40%] md:w-auto md:flex-1 max-w-[320px] flex justify-end shrink" data-testid="feedback-container">
                         {feedback && (
-                             <div className={`w-full rounded-2xl p-4 md:p-5 animate-slide-up border shadow-sm ${feedback.isCorrect ? 'bg-emerald-50/80 border-emerald-100' : 'bg-red-50/80 border-red-100'}`}>
+                             <div className={`w-full rounded-2xl p-4 md:p-5 animate-slide-up border shadow-sm ${feedback.isCorrect ? 'bg-duo-green/10/80 border-duo-green/20' : 'bg-red-50/80 border-red-100'}`}>
                                 <div className="flex flex-col lg:flex-row items-start gap-3">
-                                   <div className={`p-2.5 rounded-xl shrink-0 ${feedback.isCorrect ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
+                                   <div className={`p-2.5 rounded-xl shrink-0 ${feedback.isCorrect ? 'bg-duo-green/20 text-duo-green-dark' : 'bg-red-100 text-red-600'}`}>
                                       {feedback.isCorrect ? <CheckCircle2 size={22}/> : <AlertCircle size={22}/>} 
                                    </div>
                                    <div className="space-y-1.5 flex-1 w-full min-w-0 lg:self-center">
-                                      <h3 className={`text-base md:text-lg font-bold ${feedback.isCorrect ? 'text-emerald-900' : 'text-red-900'} flex flex-wrap items-center gap-2`}>
+                                      <h3 className={`text-base md:text-lg font-bold ${feedback.isCorrect ? 'text-duo-green-dark' : 'text-red-900'} flex flex-wrap items-center gap-2`}>
                                          {feedback.isCorrect ? 'Correct!' : 'Incorrect'}
                                          {feedback.isCorrect && (
                                              <span className="text-[10px] md:text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full border border-yellow-200 animate-pulse whitespace-nowrap">

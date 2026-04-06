@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, BookOpen, Clock, AlertTriangle, CheckCircle2, RefreshCw } from 'lucide-react';
 import { Card } from './Card';
 import { WordProgressBar } from './WordProgressBar';
@@ -44,10 +45,10 @@ const categoryDescriptions: Record<string, string> = {
 
 // 分类对应的强调色
 const categoryAccents: Record<string, { bg: string; border: string; text: string; icon: React.ReactNode }> = {
-  mastered: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-600', icon: <CheckCircle2 size={16} /> },
+  mastered: { bg: 'bg-duo-green/10', border: 'border-emerald-200', text: 'text-duo-green-dark', icon: <CheckCircle2 size={16} /> },
   learning: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-600', icon: <RefreshCw size={16} /> },
   new: { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-500', icon: <BookOpen size={16} /> },
-  toReview: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-600', icon: <Clock size={16} /> },
+  toReview: { bg: 'bg-duo-yellow/10', border: 'border-duo-yellow/30', text: 'text-duo-orange', icon: <Clock size={16} /> },
   struggling: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-600', icon: <AlertTriangle size={16} /> },
 };
 
@@ -96,8 +97,8 @@ export const ProgressDetailsModal: React.FC<ProgressDetailsModalProps> = ({
     return '即将';
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-hidden">
       <div 
         className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity"
         onClick={onClose}
@@ -178,7 +179,7 @@ export const ProgressDetailsModal: React.FC<ProgressDetailsModalProps> = ({
                     
                     {/* 连续正确次数 */}
                     {item.consecutiveCorrect !== undefined && item.consecutiveCorrect > 0 && (
-                      <span className="text-[11px] px-2 py-1 rounded-lg bg-emerald-50 text-emerald-600 font-medium flex items-center gap-1">
+                      <span className="text-[11px] px-2 py-1 rounded-lg bg-duo-green/10 text-duo-green-dark font-medium flex items-center gap-1">
                         <CheckCircle2 size={10} />
                         连对{item.consecutiveCorrect}
                       </span>
@@ -196,7 +197,7 @@ export const ProgressDetailsModal: React.FC<ProgressDetailsModalProps> = ({
                     {item.nextReviewAt && (
                       <span className={`text-[11px] px-2 py-1 rounded-lg ${
                         formatNextReview(item.nextReviewAt) === '待复习' 
-                          ? 'bg-amber-50 text-amber-600' 
+                          ? 'bg-duo-yellow/10 text-duo-orange' 
                           : 'bg-gray-50 text-gray-500'
                       } font-medium flex items-center gap-1 ml-auto`}>
                         <Clock size={10} />
@@ -219,7 +220,8 @@ export const ProgressDetailsModal: React.FC<ProgressDetailsModalProps> = ({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

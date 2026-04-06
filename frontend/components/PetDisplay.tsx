@@ -125,12 +125,12 @@ const PetDisplay: React.FC = () => {
       <div className="relative z-10 w-full space-y-4 mb-8">
         <div className="space-y-1.5">
           <div className="flex justify-between text-xs font-bold text-gray-600">
-            <span className="flex items-center gap-1.5"><Zap size={14} className="text-amber-500"/> 能量 (Energy)</span>
+            <span className="flex items-center gap-1.5"><Zap size={14} className="text-duo-yellow"/> 能量 (Energy)</span>
             <span>{pet.energy}/100</span>
           </div>
           <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
             <div 
-              className="bg-gradient-to-r from-amber-400 to-amber-500 h-full rounded-full transition-all duration-500" 
+              className="bg-gradient-to-r from-duo-yellow to-[#fca510] h-full rounded-full transition-all duration-500" 
               style={{ width: `${pet.energy}%` }}
             />
           </div>
@@ -138,12 +138,12 @@ const PetDisplay: React.FC = () => {
 
         <div className="space-y-1.5">
           <div className="flex justify-between text-xs font-bold text-gray-600">
-            <span className="flex items-center gap-1.5"><Heart size={14} className="text-rose-500"/> 饥饿 (Hunger)</span>
+            <span className="flex items-center gap-1.5"><Heart size={14} className="text-duo-red"/> 饥饿 (Hunger)</span>
             <span>{pet.hunger}/100</span>
           </div>
           <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
             <div 
-              className="bg-gradient-to-r from-rose-400 to-rose-500 h-full rounded-full transition-all duration-500" 
+              className="bg-gradient-to-r from-duo-red to-duo-red-dark h-full rounded-full transition-all duration-500" 
               style={{ width: `${pet.hunger}%` }}
             />
           </div>
@@ -159,7 +159,7 @@ const PetDisplay: React.FC = () => {
             disabled={!canAffordFeed || isFeeding}
             className={`w-full flex flex-col items-center justify-center py-2.5 rounded-xl border-2 transition-all ${
               canAffordFeed 
-                ? 'bg-rose-50 border-rose-100 text-rose-600 hover:bg-rose-100 hover:border-rose-200 active:scale-95' 
+                ? 'bg-duo-red/10 border-duo-red/20 text-duo-red-dark hover:bg-duo-red/20 hover:border-duo-red/30 active:scale-95' 
                 : 'bg-gray-50 border-gray-100 text-gray-400 cursor-not-allowed'
             }`}
           >

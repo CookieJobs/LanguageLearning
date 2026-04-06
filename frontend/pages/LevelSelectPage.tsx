@@ -2,13 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import { EducationLevel } from '../types';
-import { fetchTextbooks } from '../services/geminiService';
-import { ArrowLeft, Check, Book } from 'lucide-react';
+import { ArrowLeft, Check } from 'lucide-react';
 
 export const LevelSelectPage: React.FC = () => {
     const { isLoading, level: currentLevel, handleLevelSelect, selectedTextbook: currentTextbook } = useApp();
     const navigate = useNavigate();
-    const [middleTextbooks, setMiddleTextbooks] = useState<string[]>([]);
 
     // Local state for immediate feedback without triggering global loading
     const [tempLevel, setTempLevel] = useState<EducationLevel | null>(currentLevel);
@@ -21,10 +19,6 @@ export const LevelSelectPage: React.FC = () => {
     useEffect(() => {
         setTempTextbook(currentTextbook);
     }, [currentTextbook]);
-
-    useEffect(() => {
-        fetchTextbooks('Middle').then(setMiddleTextbooks).catch(() => { });
-    }, []);
 
 
     const levels = [
@@ -59,9 +53,7 @@ export const LevelSelectPage: React.FC = () => {
                             <button
                                 onClick={() => {
                                     setTempLevel(l.id);
-                                    if (l.id !== EducationLevel.MIDDLE) {
-                                        setTempTextbook(null);
-                                    }
+                                    setTempTextbook(null);
                                 }}
                                 disabled={isLoading}
                                 className={`
@@ -99,33 +91,6 @@ export const LevelSelectPage: React.FC = () => {
                                     </div>
                                 )}
                             </button>
-
-                            {/* Textbook Selection for Middle School */}
-                            {l.id === EducationLevel.MIDDLE && tempLevel === EducationLevel.MIDDLE && middleTextbooks.length > 0 && (
-                                <div className="mt-2 ml-4 pl-4 border-l-2 border-brand-200 animate-slide-down">
-                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-                                        <Book size={12} /> 选择教材 (可选)
-                                    </p>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); setTempTextbook(null); }}
-                                            className={`px-3 py-2 text-sm rounded-lg border text-left transition-all ${!tempTextbook ? 'bg-brand-500 text-white border-brand-500 shadow-sm' : 'bg-white text-gray-600 border-gray-200 hover:border-brand-300'}`}
-                                        >
-                                            默认 (综合词汇)
-                                        </button>
-                                        {middleTextbooks.map(tb => (
-                                            <button
-                                                key={tb}
-                                                onClick={(e) => { e.stopPropagation(); setTempTextbook(tb); }}
-                                                className={`px-3 py-2 text-sm rounded-lg border text-left truncate transition-all ${tempTextbook === tb ? 'bg-brand-500 text-white border-brand-500 shadow-sm' : 'bg-white text-gray-600 border-gray-200 hover:border-brand-300'}`}
-                                                title={tb}
-                                            >
-                                                {tb}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     ))}
                 </div>

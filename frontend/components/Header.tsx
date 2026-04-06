@@ -66,7 +66,7 @@ export const Header: React.FC = () => {
                             <div className="flex items-center gap-3">
                                 {userEmail && (
                                     <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-gradient-to-br from-gray-50 to-slate-50 border border-gray-200/50 rounded-xl shadow-sm cursor-default">
-                                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-brand-100 to-indigo-100 flex items-center justify-center text-brand-600 border border-brand-200/50 shadow-sm">
+                                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-brand-100 to-duo-blue/20 flex items-center justify-center text-brand-600 border border-brand-200/50 shadow-sm">
                                             <User size={12} strokeWidth={2.5} />
                                         </div>
                                         <span className="hidden md:inline text-sm font-bold text-gray-600">{userEmail.split('@')[0]}</span>
@@ -75,7 +75,7 @@ export const Header: React.FC = () => {
 
                                 <button
                                     onClick={async () => { await logout(); navigate('/login'); }}
-                                    className="flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-red-50 to-rose-50 hover:from-red-100 hover:to-rose-100 text-red-500 hover:text-red-600 border border-red-200/50 hover:border-red-200 transition-all shadow-sm group"
+                                    className="flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-red-50 to-duo-red/10 hover:from-red-100 hover:to-duo-red/20 text-red-500 hover:text-red-600 border border-red-200/50 hover:border-red-200 transition-all shadow-sm group"
                                     title="退出登录"
                                 >
                                     <LogOut size={16} className="group-hover:scale-110 transition-transform" />

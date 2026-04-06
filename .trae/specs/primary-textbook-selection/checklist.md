@@ -1,0 +1,6 @@
+- [x] `import-primary-textbooks.ts` 脚本能够成功执行并将小学教材名称添加到 `VocabWord` 的 `textbooks` 字段中
+- [x] 后端提供按年级获取小学教材列表的功能
+- [x] 前端 `LevelSelectPage` 在选中“小学”时展示年级选择
+- [x] 前端 `LevelSelectPage` 在选中“年级”时展示该年级对应的教材
+- [x] 用户选择教材并保存后，个人资料中的 `textbook` 字段被正确更新
+- [x] 开始学习时，系统优先推送用户所选教材的单词

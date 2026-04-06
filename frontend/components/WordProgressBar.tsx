@@ -62,18 +62,14 @@ export const WordProgressBar: React.FC<WordProgressBarProps> = ({
 
         {/* 节点标记 */}
         {showNodes && (
-          <div className="absolute inset-0 flex items-center justify-between px-0" style={{ height: `${height}px` }}>
+          <div className="absolute inset-0 flex items-center justify-between px-0 pointer-events-none" style={{ height: `${height}px` }}>
             {[0, 1, 2, 3].map((nodeStage) => (
               <div
                 key={nodeStage}
-                className="relative"
+                className="relative flex-shrink-0"
                 style={{
                   width: `${height + 4}px`,
                   height: `${height + 4}px`,
-                  transform: 'translateY(-50%)',
-                  top: '50%',
-                  left: nodeStage === 0 ? '0' : nodeStage === 3 ? 'calc(100% - 12px)' : `${(nodeStage / 3) * 100}%`,
-                  marginLeft: nodeStage === 0 ? '0' : nodeStage === 3 ? '0' : '-6px',
                 }}
               >
                 <div

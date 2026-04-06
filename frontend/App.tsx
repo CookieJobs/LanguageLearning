@@ -1,4 +1,4 @@
-// input: react, ./components/LoadingOverlay, ./components/SessionExpiredModal, lucide-react, react-router-dom, ./contexts/AppContext, ./router/AuthGuard, ./pages/LoginPage, ./pages/HomePage, ./pages/LearnPage, ./pages/ReviewPage, ./components/Logo
+// input: react, ./components/LoadingOverlay, ./components/SessionExpiredModal, lucide-react, react-router-dom, ./contexts/AppContext, ./router/AuthGuard, ./pages/LoginPage, ./pages/HomePage, ./pages/LearnPage, ./pages/ReviewPage, ./pages/EnglishWallPage, ./components/Logo
 // output: AppRouter
 // pos: 系统/通用
 // 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
@@ -15,6 +15,7 @@ const LoginPage = React.lazy(() => import('./pages/LoginPage').then(m => ({ defa
 const HomePage = React.lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
 const LearnPage = React.lazy(() => import('./pages/LearnPage').then(m => ({ default: m.LearnPage })));
 const ReviewPage = React.lazy(() => import('./pages/ReviewPage').then(m => ({ default: m.ReviewPage })));
+const EnglishWallPage = React.lazy(() => import('./pages/EnglishWallPage').then(m => ({ default: m.EnglishWallPage })));
 const LevelSelectPage = React.lazy(() => import('./pages/LevelSelectPage').then(m => ({ default: m.LevelSelectPage })));
 const DebugPage = React.lazy(() => import('./pages/DebugPage').then(m => ({ default: m.DebugPage })));
 
@@ -30,7 +31,7 @@ const AppRouter: React.FC = () => {
       }
     }, [token, location.pathname]);
 
-    const showHeader = location.pathname !== '/login' && location.pathname !== '/learn';
+    const showHeader = location.pathname !== '/login' && location.pathname !== '/learn' && location.pathname !== '/english-wall';
 
     return (
       <div className="min-h-screen flex flex-col font-sans text-gray-900 bg-transparent">
@@ -43,6 +44,7 @@ const AppRouter: React.FC = () => {
               <Route path="/level-select" element={<AuthGuard><LevelSelectPage /></AuthGuard>} />
               <Route path="/learn" element={<AuthGuard><LearnPage /></AuthGuard>} />
               <Route path="/review" element={<AuthGuard><ReviewPage /></AuthGuard>} />
+              <Route path="/english-wall" element={<AuthGuard><EnglishWallPage /></AuthGuard>} />
               <Route path="/debug" element={<AuthGuard><DebugPage /></AuthGuard>} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

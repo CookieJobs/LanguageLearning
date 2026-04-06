@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getCalendar } from '../services/geminiService';
 
@@ -45,8 +46,8 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose })
     return dates.has(key);
   };
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in overflow-hidden" onClick={onClose}>
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-scale-in" onClick={e => e.stopPropagation()}>
         <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
           <h3 className="font-bold text-lg text-gray-800">打卡日历</h3>
@@ -88,6 +89,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose })
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

@@ -1,0 +1,5 @@
+- [x] 后端 `/api/debug/reset-review` 能正确将所有待复习单词时间设为当前。
+- [x] 后端 `/api/debug/set-word-stage` 能正确将指定单词阶段修改为 2 或 3，且 `nextReviewAt` 设为过去。
+- [x] 后端 `/api/debug/pet` 能正确修改宠物经验、等级和能量。
+- [x] 前端 `/debug` 页面能够正常访问并调用上述接口。
+- [x] 通过 Debug 页面设置后，回到主页能够立即体验到造句题（Stage 3）和填空题（Stage 2）。

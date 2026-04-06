@@ -3,6 +3,7 @@
 // pos: 前端/组件层
 // 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Languages, RefreshCw, X, BookOpen } from 'lucide-react';
 
 interface StoryModalProps {
@@ -17,8 +18,8 @@ interface StoryModalProps {
 export const StoryModal: React.FC<StoryModalProps> = ({ story, translation, isLoading, onClose, onGenerate, error }) => {
     const [showTranslation, setShowTranslation] = useState(true);
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-fade-in">
+    return createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-fade-in overflow-hidden">
             <div className="bg-white rounded-2xl border-2 border-gray-200 border-b-4 shadow-2xl w-full max-w-lg overflow-hidden animate-scale-in flex flex-col max-h-[85vh]">
 
                 {/* Header */}
@@ -116,6 +117,7 @@ export const StoryModal: React.FC<StoryModalProps> = ({ story, translation, isLo
                     )}
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };

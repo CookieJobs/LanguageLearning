@@ -3,6 +3,7 @@
 // pos: 前端/组件层
 // 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import React, { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { Sparkles, Trophy, Flame, Home } from 'lucide-react'
 import { generateStory } from '../services/geminiService'
 import { StoryModal } from './StoryModal'
@@ -58,8 +59,8 @@ export const SessionSummary: React.FC<SessionSummaryProps> = ({ items, count, st
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-fade-in overflow-hidden">
       <div className="bg-white rounded-3xl border-2 border-gray-200 border-b-4 shadow-xl w-full max-w-lg p-8 animate-scale-in">
         <div className="text-center mb-6">
           <div className="relative inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-green-100 text-duo-green mb-4 border-2 border-duo-green border-b-4">
@@ -83,7 +84,7 @@ export const SessionSummary: React.FC<SessionSummaryProps> = ({ items, count, st
             <div className="flex items-center gap-1.5">
               <Flame size={20} className="text-orange-500 fill-orange-500" />
               <span className="text-3xl font-extrabold">{streak}</span>
-              {streakDelta > 0 && <span className="text-xs font-bold bg-amber-200 text-amber-800 px-1.5 py-0.5 rounded-full ml-1">+{streakDelta}</span>}
+              {streakDelta > 0 && <span className="text-xs font-bold bg-duo-yellow/30 text-duo-orange px-1.5 py-0.5 rounded-full ml-1">+{streakDelta}</span>}
             </div>
             <span className="text-xs font-bold uppercase tracking-wider opacity-70 mt-1">连续打卡</span>
           </div>
@@ -101,7 +102,7 @@ export const SessionSummary: React.FC<SessionSummaryProps> = ({ items, count, st
                 <div className="flex-shrink-0">
                   {it.stage === 'new' && <span className="text-xs font-bold text-green-700 bg-green-100 px-2.5 py-1 rounded-full border border-green-200">🌱 初识</span>}
                   {it.stage === 'familiar' && <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2.5 py-1 rounded-full border border-blue-200">🌿 熟悉</span>}
-                  {it.stage === 'mastered' && <span className="text-xs font-bold text-amber-700 bg-amber-100 px-2.5 py-1 rounded-full border border-amber-200">🌳 掌握</span>}
+                  {it.stage === 'mastered' && <span className="text-xs font-bold text-duo-orange bg-duo-yellow/20 px-2.5 py-1 rounded-full border border-duo-yellow/30">🌳 掌握</span>}
                 </div>
               </div>
             ))
@@ -141,6 +142,7 @@ export const SessionSummary: React.FC<SessionSummaryProps> = ({ items, count, st
           onGenerate={handleGenerateStory}
         />
       )}
-    </div>
+    </div>,
+    document.body
   )
 }

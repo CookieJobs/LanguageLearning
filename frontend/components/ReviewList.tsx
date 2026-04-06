@@ -4,20 +4,13 @@
 // 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import React, { useEffect, useState } from 'react';
 import { MasteredItem, EducationLevel } from '../types';
-import { fetchMasteryList, generateStory } from '../services/geminiService';
-import { CheckCircle2, Quote, Sparkles, ArrowLeft, BookOpen, Layers } from 'lucide-react';
-import { StoryModal } from './StoryModal';
-import { Button } from './Button';
+import { fetchMasteryList } from '../services/geminiService';
+import { CheckCircle2, Quote, BookOpen, Layers } from 'lucide-react';
 
-interface ReviewListProps { items: MasteredItem[]; onBack: () => void }
+interface ReviewListProps { items: MasteredItem[]; }
 
-export const ReviewList: React.FC<ReviewListProps> = ({ items, onBack }) => {
+export const ReviewList: React.FC<ReviewListProps> = ({ items }) => {
   const [serverItems, setServerItems] = useState<MasteredItem[]>(items);
-  const [showStoryModal, setShowStoryModal] = useState(false);
-  const [story, setStory] = useState<string | null>(null);
-  const [translation, setTranslation] = useState<string | undefined>(undefined);
-  const [loadingStory, setLoadingStory] = useState(false);
-  const [storyError, setStoryError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -38,30 +31,6 @@ export const ReviewList: React.FC<ReviewListProps> = ({ items, onBack }) => {
     })()
   }, [])
 
-  const handleGenerateStory = async () => {
-    if (serverItems.length === 0) return;
-
-    setLoadingStory(true);
-    setStoryError(null);
-    setStory(null);
-    setTranslation(undefined);
-    setShowStoryModal(true);
-
-    try {
-      const words = serverItems.map(i => i.word);
-      const shuffled = words.sort(() => 0.5 - Math.random());
-      const selected = shuffled.slice(0, 5);
-
-      const res = await generateStory(selected);
-      setStory(res.story);
-      setTranslation(res.translation);
-    } catch (e) {
-      setStoryError('生成故事失败，请重试。');
-    } finally {
-      setLoadingStory(false);
-    }
-  };
-
   const getSourceLabel = (level?: string) => {
     if (!level) return null;
     const map: any = {
@@ -78,38 +47,9 @@ export const ReviewList: React.FC<ReviewListProps> = ({ items, onBack }) => {
   const displayed: MasteredItem[] = serverItems
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 animate-fade-in relative z-10">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+      <div className="mb-8">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">已掌握词汇</h2>
-        <div className="flex items-center gap-2.5">
-          <Button
-            variant="secondary"
-            onClick={handleGenerateStory}
-            disabled={displayed.length === 0}
-            className="flex items-center gap-2"
-          >
-            <Sparkles size={16} />
-            故事模式
-          </Button>
-          <Button
-            variant="outline"
-            onClick={onBack}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft size={16} /> 返回
-          </Button>
-        </div>
       </div>
-
-      {showStoryModal && (
-        <StoryModal
-          story={story}
-          translation={translation}
-          isLoading={loadingStory}
-          error={storyError}
-          onClose={() => setShowStoryModal(false)}
-          onGenerate={handleGenerateStory}
-        />
-      )}
 
       {displayed.length === 0 ? (
         <div className="text-center py-20 bg-white border-2 border-gray-200 border-b-4 rounded-xl">
@@ -129,14 +69,14 @@ export const ReviewList: React.FC<ReviewListProps> = ({ items, onBack }) => {
                   <div className="flex flex-wrap gap-2 mt-1.5">
                     <span className="text-[10px] font-semibold uppercase tracking-wider bg-brand-50 text-brand-600 px-2 py-0.5 rounded-md border border-brand-100">{item.partOfSpeech}</span>
                     {item.sourceLevel && (
-                      <span className="text-[10px] font-semibold uppercase tracking-wider bg-amber-50 text-amber-600 px-2 py-0.5 rounded-md border border-amber-100 flex items-center gap-1">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider bg-duo-yellow/10 text-duo-orange px-2 py-0.5 rounded-md border border-duo-yellow/20 flex items-center gap-1">
                         <Layers size={8} />
                         {getSourceLabel(item.sourceLevel)}
                       </span>
                     )}
                   </div>
                 </div>
-                <CheckCircle2 className="text-emerald-400 group-hover:text-emerald-500 transition-colors" size={20} />
+                <CheckCircle2 className="text-duo-green group-hover:text-duo-green transition-colors" size={20} />
               </div>
               <p className="text-gray-500 text-sm mb-3 line-clamp-2 leading-relaxed flex-1">{item.definition}</p>
               <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-3.5 relative border border-gray-100">

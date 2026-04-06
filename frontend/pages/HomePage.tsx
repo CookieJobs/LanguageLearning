@@ -67,11 +67,11 @@ export const HomePage: React.FC = () => {
           <div className="lg:col-span-2 flex flex-col gap-6 lg:gap-8">
             
             {/* Main Action Area (Hero) */}
-            <div className="relative group overflow-hidden rounded-3xl bg-indigo-600 border-b-8 border-indigo-700 animate-scale-in">
+            <div className="relative group overflow-hidden rounded-3xl bg-duo-blue border-b-8 border-duo-blue-dark animate-scale-in">
               <div className="relative z-10 p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
                 <div className="max-w-md text-center md:text-left">
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-black/20 text-white text-xs font-bold uppercase tracking-wider mb-4">
-                    <Zap size={14} className="text-amber-400 fill-current" />
+                    <Zap size={14} className="text-duo-yellow fill-current" />
                     推荐练习
                   </div>
                   <h3 className="text-3xl md:text-4xl font-black text-white mb-4 leading-tight tracking-tight drop-shadow-sm">

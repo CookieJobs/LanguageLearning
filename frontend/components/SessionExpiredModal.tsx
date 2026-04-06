@@ -3,6 +3,7 @@
 // pos: 前端/组件层
 // 若我被更新，请同步更新我的开头注释，以及所属的文件夹的 README。
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { LogIn, AlertCircle } from 'lucide-react';
 import { Button } from './Button';
 
@@ -14,12 +15,12 @@ interface SessionExpiredModalProps {
 export const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ visible, onLogin }) => {
   if (!visible) return null;
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-fade-in">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-fade-in overflow-hidden">
       <div className="bg-white rounded-2xl border-2 border-gray-200 border-b-4 shadow-2xl w-full max-w-sm overflow-hidden animate-scale-in flex flex-col">
         <div className="p-8 flex flex-col items-center text-center space-y-4">
-          <div className="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mb-2 shadow-sm border-2 border-amber-200 border-b-4">
-            <AlertCircle className="w-8 h-8 text-amber-600" />
+          <div className="w-16 h-16 bg-duo-yellow/20 rounded-2xl flex items-center justify-center mb-2 shadow-sm border-2 border-duo-yellow/30 border-b-4">
+            <AlertCircle className="w-8 h-8 text-duo-orange" />
           </div>
 
           <h2 className="text-xl font-bold text-gray-900">
@@ -42,6 +43,7 @@ export const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ visibl
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

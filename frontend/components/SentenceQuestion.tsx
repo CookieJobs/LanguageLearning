@@ -82,13 +82,17 @@ export const SentenceQuestion: React.FC<SentenceQuestionProps> = ({
 
        {/* Hint Dropdown */}
        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showHint ? 'max-h-28 opacity-100' : 'max-h-0 opacity-0'}`}>
-          <div className="bg-amber-50/80 border border-amber-100 rounded-xl p-4 flex gap-3">
-             <div className="p-2 bg-amber-100 text-amber-600 rounded-lg shrink-0 h-fit">
+          <div className="bg-duo-yellow/10/80 border border-duo-yellow/20 rounded-xl p-4 flex gap-3">
+             <div className="p-2 bg-duo-yellow/20 text-duo-orange rounded-lg shrink-0 h-fit">
                 <Sparkles size={16} />
              </div>
              <div>
-                <span className="text-[10px] font-semibold text-amber-700 uppercase tracking-wider block mb-1">例句</span>
-                <p className="text-amber-900 font-medium italic text-sm">"{word.example}"</p>
+                <span className="text-[10px] font-semibold text-duo-orange uppercase tracking-wider block mb-1">
+                   {word.example ? '例句' : '释义'}
+                </span>
+                <p className="text-duo-orange font-medium italic text-sm">
+                   {word.example ? `"${word.example}"` : word.definition}
+                </p>
              </div>
           </div>
        </div>

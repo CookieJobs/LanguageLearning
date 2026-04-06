@@ -19,9 +19,9 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', withText = true, classN
       <div className={`
         relative flex items-center justify-center 
         ${sizes.box}
-        bg-gradient-to-br from-brand-50 to-indigo-50
+        bg-gradient-to-br from-brand-50 to-duo-blue/10
         border border-brand-200/50
-        group-hover:from-brand-100 group-hover:to-indigo-100 group-hover:border-brand-200
+        group-hover:from-brand-100 group-hover:to-duo-blue/20 group-hover:border-brand-200
         group-hover:scale-110
         transition-all duration-300 ease-out
         shadow-sm
