@@ -88,7 +88,7 @@ export class TextbookService implements OnModuleInit {
                                 cefr: 'A1', // Default
                                 definitionEn: translation,
                                 definitionZh: translation,
-                                exampleEn: `Example for ${headword}`,
+                                exampleEn: '', // Raw data lacks example sentences
                                 levels: ['Middle'] // Assume imported textbooks are for Middle school as per request
                             },
                             $addToSet: { textbooks: textbookName }

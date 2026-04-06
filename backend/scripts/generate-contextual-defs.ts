@@ -177,32 +177,41 @@ async function processTextbook(textbook: string) {
 }
 
 async function main() {
-    await mongoose.connect(MONGO_URL);
-    loadCache();
+    try {
+        await mongoose.connect(MONGO_URL);
+        console.log('Connected to MongoDB.');
+        loadCache();
 
-    // Load textbooks
-    const textbooks: string[] = JSON.parse(fs.readFileSync(TEXTBOOKS_FILE, 'utf-8'));
-    
-    // For verification, let's just process the FIRST textbook found in DB that has words, 
-    // or a specific target one if the user asked. 
-    // The user said "Give supplementary in the plan... we complete it together".
-    // I will run for ONE specific book to prove it works, then I can easily extend to loop all.
-    // Let's pick "人教版三年级起点三年级上" as it's a very standard one.
-    
-    const targetBook = "人教版三年级起点三年级上";
-    
-    if (textbooks.includes(targetBook)) {
-        await processTextbook(targetBook);
-    } else {
-        console.log(`Target book "${targetBook}" not found in list.`);
+        // 加载教材列表
+        if (!fs.existsSync(TEXTBOOKS_FILE)) {
+            throw new Error(`Textbooks file not found at ${TEXTBOOKS_FILE}`);
+        }
+        const textbooks: string[] = JSON.parse(fs.readFileSync(TEXTBOOKS_FILE, 'utf-8'));
+        
+        console.log(`Total textbooks found: ${textbooks.length}`);
+
+        // 遍历处理所有教材
+        for (let i = 0; i < textbooks.length; i++) {
+            const book = textbooks[i];
+            console.log(`\n--------------------------------------------------`);
+            console.log(`Progress: [${i + 1}/${textbooks.length}]`);
+            console.log(`Target: ${book}`);
+            console.log(`--------------------------------------------------`);
+            
+            try {
+                await processTextbook(book);
+            } catch (error) {
+                console.error(`Failed to process "${book}":`, error);
+            }
+        }
+
+        console.log('\nProcessing complete!');
+    } catch (error) {
+        console.error('Fatal error in main:', error);
+    } finally {
+        await mongoose.disconnect();
+        console.log('Disconnected from MongoDB.');
     }
-
-    // If we want to run ALL, we would do:
-    for (const book of textbooks) { 
-        await processTextbook(book); 
-    }
-
-    await mongoose.disconnect();
 }
 
 main().catch(console.error);

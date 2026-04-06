@@ -85,7 +85,7 @@ async function main() {
                     cefr: 'A1', // Default
                     definitionEn: translation || headword, // Fallback
                     definitionZh: translation || '',
-                    exampleEn: `Example for ${headword}`,
+                    exampleEn: '', // Raw data lacks example sentences
                     levels: ['Middle'], // Defaulting to Middle for these textbooks
                 };
 

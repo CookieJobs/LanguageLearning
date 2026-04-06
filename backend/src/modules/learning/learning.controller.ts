@@ -70,11 +70,12 @@ export class LearningController {
       
       if (q) {
         q.progressId = String(item._id)
+        const isDummyExample = word.exampleEn?.startsWith('Example for ') && word.exampleEn?.includes(word.headword);
         q.word = {
           word: word.headword,
           definition: word.definitionZh,
           partOfSpeech: word.pos,
-          example: word.exampleEn,
+          example: isDummyExample ? '' : word.exampleEn,
           audioUrl: word.audioUrl
         }
         questions.push(q)
@@ -98,11 +99,12 @@ export class LearningController {
           const w = word as any
           const mode = Math.random() > 0.5 ? 'en-zh' : 'zh-en'
           const q: any = await this.questionGenerator.generateChoiceQuestion(w, mode)
+          const isDummyExample = w.exampleEn?.startsWith('Example for ') && w.exampleEn?.includes(w.headword);
           q.word = {
             word: w.headword,
             definition: w.definitionZh,
             partOfSpeech: w.pos,
-            example: w.exampleEn,
+            example: isDummyExample ? '' : w.exampleEn,
             audioUrl: w.audioUrl
           }
           questions.push(q)
@@ -180,13 +182,16 @@ export class LearningController {
     const seed = `${levelCode}:${new Date().toISOString().slice(0, 10)}`
     try {
       const picked = await this.vocab.pickWords(levelCode, body.exclude || [], 5, seed, body.textbook)
-      return picked.map((w: any) => ({
-        word: w.headword,
-        definition: { English: w.definitionEn, Chinese: w.definitionZh },
-        partOfSpeech: w.pos,
-        example: w.exampleEn,
-        audioUrl: w.audioUrl
-      }))
+      return picked.map((w: any) => {
+        const isDummyExample = w.exampleEn?.startsWith('Example for ') && w.exampleEn?.includes(w.headword);
+        return {
+          word: w.headword,
+          definition: { English: w.definitionEn, Chinese: w.definitionZh },
+          partOfSpeech: w.pos,
+          example: isDummyExample ? '' : w.exampleEn,
+          audioUrl: w.audioUrl
+        };
+      })
     } catch (e: any) {
       const msg = String(e?.message || '')
       if (msg === 'VOCAB_EMPTY') throw new BadRequestException('VOCAB_EMPTY')

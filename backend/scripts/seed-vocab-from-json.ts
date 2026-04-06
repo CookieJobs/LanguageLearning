@@ -8,7 +8,7 @@ import mongoose from 'mongoose'
 import { VocabWordSchema } from '../src/modules/learning/vocab.schema'
 
 async function main() {
-  const file = path.resolve(__dirname, '../../../data/vocab/words.json')
+  const file = path.resolve(__dirname, '../../data/vocab/words.json')
   const raw = fs.readFileSync(file, 'utf-8')
   const items = JSON.parse(raw)
   const mongoUrl = process.env.MONGO_URL || 'mongodb://localhost:27017/linguacraft'
