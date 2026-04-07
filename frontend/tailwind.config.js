@@ -37,7 +37,26 @@ export default {
           700: '#a21caf',
           800: '#86198f',
           900: '#701a75',
+        },
+        duo: {
+          green: '#58cc02',
+          'green-dark': '#46a302',
+          blue: '#1cb0f6',
+          'blue-dark': '#1899d6',
+          yellow: '#ffc800',
+          red: '#ff4b4b',
+          'red-dark': '#ea2b2b',
+          gray: '#e5e5e5',
+          'gray-dark': '#cecece'
         }
+      },
+      borderWidth: {
+        3: '3px'
+      },
+      borderRadius: {
+        xl: '0.75rem',
+        '2xl': '1rem',
+        '3xl': '1.5rem'
       },
       animation: {
         'fade-in': 'fadeIn 0.4s ease-out',
