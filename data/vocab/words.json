@@ -1,0 +1,21 @@
+[
+  {"id":"w1","lemma":"book","headword":"book","pos":"noun","cefr":"A1","freq_rank":1,"definition_en":"a set of pages with text","definition_zh":"书","example_en":"I borrowed a book from the library.","topics":["school","daily"],"levels":["Primary","Middle"]},
+  {"id":"w2","lemma":"study","headword":"study","pos":"verb","cefr":"A1","freq_rank":1,"definition_en":"to learn about a subject","definition_zh":"学习","example_en":"She studies English every evening.","topics":["school"],"levels":["Primary","Middle"]},
+  {"id":"w3","lemma":"teacher","headword":"teacher","pos":"noun","cefr":"A1","freq_rank":1,"definition_en":"a person who teaches","definition_zh":"老师","example_en":"My teacher helps me with math.","topics":["school"],"levels":["Primary"]},
+  {"id":"w4","lemma":"practice","headword":"practice","pos":"verb","cefr":"A2","freq_rank":2,"definition_en":"to do something repeatedly to improve","definition_zh":"练习","example_en":"You should practice speaking every day.","topics":["learning"],"levels":["Primary","Middle"]},
+  {"id":"w5","lemma":"sentence","headword":"sentence","pos":"noun","cefr":"A2","freq_rank":2,"definition_en":"a group of words expressing a statement","definition_zh":"句子","example_en":"Write a sentence using the new word.","topics":["grammar"],"levels":["Primary","Middle"]},
+
+  {"id":"w6","lemma":"experiment","headword":"experiment","pos":"noun","cefr":"B1","freq_rank":3,"definition_en":"a scientific test to discover something","definition_zh":"实验","example_en":"We did a chemistry experiment in class.","topics":["science"],"levels":["Middle","High"]},
+  {"id":"w7","lemma":"analyze","headword":"analyze","pos":"verb","cefr":"B1","freq_rank":3,"definition_en":"to examine something in detail","definition_zh":"分析","example_en":"Students analyze the data from the survey.","topics":["science","academic"],"levels":["Middle","High"]},
+  {"id":"w8","lemma":"trend","headword":"trend","pos":"noun","cefr":"B1","freq_rank":3,"definition_en":"a general direction in which something develops","definition_zh":"趋势","example_en":"The chart shows a clear upward trend.","topics":["math","society"],"levels":["Middle","High"]},
+
+  {"id":"w9","lemma":"hypothesis","headword":"hypothesis","pos":"noun","cefr":"B2","freq_rank":4,"definition_en":"an idea that can be tested","definition_zh":"假设","example_en":"The experiment supports our hypothesis.","topics":["science"],"levels":["High","University"]},
+  {"id":"w10","lemma":"interpret","headword":"interpret","pos":"verb","cefr":"B2","freq_rank":4,"definition_en":"to explain the meaning of something","definition_zh":"解释","example_en":"Can you interpret the results correctly?","topics":["academic"],"levels":["High","University"]},
+  {"id":"w11","lemma":"significant","headword":"significant","pos":"adj","cefr":"B2","freq_rank":4,"definition_en":"important and meaningful","definition_zh":"显著的；重要的","example_en":"There is a significant difference between the two groups.","topics":["academic"],"levels":["High","University"]},
+
+  {"id":"w12","lemma":"evaluate","headword":"evaluate","pos":"verb","cefr":"C1","freq_rank":5,"definition_en":"to assess the value or quality","definition_zh":"评估","example_en":"The committee will evaluate each proposal.","topics":["business","academic"],"levels":["University","Professional"]},
+  {"id":"w13","lemma":"negotiate","headword":"negotiate","pos":"verb","cefr":"C1","freq_rank":5,"definition_en":"to discuss to reach agreement","definition_zh":"谈判","example_en":"They negotiated a better price.","topics":["business"],"levels":["Professional"]},
+  {"id":"w14","lemma":"compliance","headword":"compliance","pos":"noun","cefr":"C1","freq_rank":5,"definition_en":"the act of obeying rules or standards","definition_zh":"合规","example_en":"The company ensures compliance with regulations.","topics":["business","law"],"levels":["Professional"]},
+  {"id":"w15","lemma":"synthesize","headword":"synthesize","pos":"verb","cefr":"C1","freq_rank":5,"definition_en":"to combine parts to form a whole","definition_zh":"综合；合成","example_en":"Please synthesize information from multiple sources.","topics":["academic","science"],"levels":["University","Professional"]}
+]
+
