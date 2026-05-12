@@ -35,3 +35,4 @@ docker-compose.*.yml
 *.bak
 *.tmp
 .cache/
+data/raw/
