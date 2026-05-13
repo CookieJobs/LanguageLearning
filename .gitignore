@@ -19,6 +19,7 @@ npm-debug.log*
 Thumbs.db
 
 # IDE
+.claude/
 .idea/
 .vscode/
 *.swp

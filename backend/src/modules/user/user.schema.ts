@@ -8,6 +8,8 @@ export interface User {
   email: string
   passwordHash: string
   isAdmin: boolean
+  emailVerified: boolean
+  emailVerifiedAt?: Date
   status: string
   createdAt: Date
 }
@@ -27,6 +29,8 @@ export const UserSchema = new Schema<User>({
   email: { type: String, required: true, unique: true, index: true },
   passwordHash: { type: String, required: true },
   isAdmin: { type: Boolean, default: false },
+  emailVerified: { type: Boolean, default: false },
+  emailVerifiedAt: { type: Date },
   status: { type: String, default: 'active' },
   createdAt: { type: Date, default: () => new Date() }
 })
