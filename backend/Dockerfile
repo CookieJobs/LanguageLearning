@@ -1,13 +1,17 @@
-# Build stage: compile TypeScript only
+# Build stage
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package.json package-lock.json tsconfig.json ./
+RUN npm ci
 COPY src ./src
-RUN npx tsc
+RUN npm run build
 
-# Production stage: reuse pre-built argon2 binary from old image
-FROM bdcbe82ef0c2 AS runtime
+# Production stage
+FROM node:20-alpine
 WORKDIR /app
-# Replace old dist with new compiled dist (minus node_modules)
+RUN apk add --no-cache python3 make g++
+COPY package.json package-lock.json ./
+RUN npm ci --production && apk del python3 make g++
 COPY --from=builder /app/dist ./dist
-# argon2 binary already exists at /app/node_modules/argon2/lib/binding/napi-v3/argon2.node
+EXPOSE 5500
+CMD ["node", "dist/main.js"]
