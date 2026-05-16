@@ -17,23 +17,39 @@ export class MailService {
     })
   }
 
+  private logDevCode(email: string, code: string, type: string) {
+    console.log(`\n[DEV] ============================================`)
+    console.log(`[DEV] ${type} for ${email}: ${code}`)
+    console.log(`[DEV] (配置 SMTP 后可通过邮件发送)`)
+    console.log(`[DEV] ============================================\n`)
+  }
+
   async sendVerificationCode(email: string, code: string) {
     const html = `<div style="max-width:480px;margin:0 auto;padding:32px 24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif"><h2 style="color:#1f2937;margin-bottom:8px">LinguaCraft</h2><p style="color:#4b5563;font-size:16px;line-height:1.6">您的验证码是：</p><div style="background:#f3f4f6;border-radius:12px;padding:20px;text-align:center;margin:16px 0"><span style="font-size:32px;font-weight:700;letter-spacing:6px;color:#1f2937">${code}</span></div><p style="color:#9ca3af;font-size:14px">5分钟内有效，请勿分享给他人。</p></div>`
 
     const hasSmtp = process.env.SMTP_USER && process.env.SMTP_USER !== 'your_email@qq.com'
 
-    if (!hasSmtp) {
-      console.log(`\n[DEV] ============================================`)
-      console.log(`[DEV] 验证码 for ${email}: ${code}`)
-      console.log(`[DEV] (配置 SMTP 后可通过邮件发送)`)
-      console.log(`[DEV] ============================================\n`)
-      return
-    }
+    if (!hasSmtp) { this.logDevCode(email, code, '验证码'); return }
 
     await this.transporter.sendMail({
       from: process.env.SMTP_FROM || process.env.SMTP_USER,
       to: email,
       subject: 'LinguaCraft - 邮箱验证码',
+      html
+    })
+  }
+
+  async sendResetCode(email: string, code: string) {
+    const html = `<div style="max-width:480px;margin:0 auto;padding:32px 24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif"><h2 style="color:#1f2937;margin-bottom:8px">LinguaCraft</h2><p style="color:#4b5563;font-size:16px;line-height:1.6">您正在重置密码，验证码是：</p><div style="background:#f3f4f6;border-radius:12px;padding:20px;text-align:center;margin:16px 0"><span style="font-size:32px;font-weight:700;letter-spacing:6px;color:#1f2937">${code}</span></div><p style="color:#9ca3af;font-size:14px">5分钟内有效，请勿分享给他人。如非本人操作，请忽略此邮件。</p></div>`
+
+    const hasSmtp = process.env.SMTP_USER && process.env.SMTP_USER !== 'your_email@qq.com'
+
+    if (!hasSmtp) { this.logDevCode(email, code, '重置密码验证码'); return }
+
+    await this.transporter.sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: email,
+      subject: 'LinguaCraft - 重置密码',
       html
     })
   }

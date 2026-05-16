@@ -112,6 +112,50 @@ export class AuthService {
     return tokens
   }
 
+  async sendResetCode(email: string, ip: string) {
+    const user = await this.userModel.findOne({ email }).lean()
+    if (!user) return { ok: true }
+
+    const ipKey = `reset:ip:${ip}`
+    if (await this.redis.exists(ipKey)) {
+      throw new BadRequestException('code_cooldown')
+    }
+
+    const cooldownKey = `reset:cooldown:${email}`
+    if (await this.redis.exists(cooldownKey)) {
+      throw new BadRequestException('code_cooldown')
+    }
+
+    const code = String(crypto.randomInt(100000, 999999))
+    await this.redis.set(`reset:code:${email}`, code, 'EX', 600)
+    await this.redis.set(cooldownKey, '1', 'EX', 60)
+    await this.redis.set(ipKey, '1', 'EX', 60)
+    await this.mailService.sendResetCode(email, code)
+
+    return { ok: true }
+  }
+
+  async resetPassword(email: string, code: string, newPassword: string) {
+    const storedCode = await this.redis.get(`reset:code:${email}`)
+    if (!storedCode) throw new BadRequestException('code_expired')
+    if (storedCode !== code) throw new BadRequestException('code_mismatch')
+
+    const user = await this.userModel.findOne({ email })
+    if (!user) throw new BadRequestException('code_expired')
+
+    await this.redis.del(`reset:code:${email}`)
+
+    const hash = await argon2.hash(newPassword)
+    await this.userModel.findByIdAndUpdate(user._id, { $set: { passwordHash: hash } })
+
+    const userId = String(user._id)
+    await this.refreshModel.deleteMany({ userId })
+
+    const tokens = this.signTokens(userId)
+    await this.storeRefresh(userId, tokens.refreshToken)
+    return { userId, ...tokens }
+  }
+
   async logout(userId: string) { await this.refreshModel.deleteMany({ userId }); return { ok: true } }
 
   private async storeRefresh(userId: string, token: string) {
