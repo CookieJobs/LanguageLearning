@@ -20,7 +20,9 @@ services:
       - redis_data:/data
 
   backend:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
     container_name: linguacraft-backend
     restart: unless-stopped
     ports:
